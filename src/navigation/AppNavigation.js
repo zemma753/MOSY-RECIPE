@@ -25,15 +25,6 @@ function MainTabs() {
       }}
     >
       <Tab.Screen
-        name="Favorite"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="star" color={color} size={24} />
-          ),
-        }}
-        component={FavoriteScreen}
-      />
-      <Tab.Screen
         name="Home"
         options={{
           tabBarIcon: ({ color }) => (
@@ -41,6 +32,15 @@ function MainTabs() {
           ),
         }}
         component={HomeScreen}
+      />
+      <Tab.Screen
+        name="Favorite"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="star" color={color} size={24} />
+          ),
+        }}
+        component={FavoriteScreen}
       />
       <Tab.Screen
         name="Vorrat"

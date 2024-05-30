@@ -11,32 +11,36 @@ import {
   Button,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  widthPercentageToDP,
+  heightPercentageToDP,
+} from "react-native-responsive-screen";
 
 const tips = [
   {
-    id: '1',
+    id: "1",
     image: require("../../assets/obst.jpg"),
-    text: "Tomaten nicht im Kühlschrank aufbewahren, da sie so schneller an Geschmack verlieren. Lagere sie bei Raumtemperatur."
+    text: "Tomaten nicht im Kühlschrank aufbewahren, da sie so schneller an Geschmack verlieren. Lagere sie bei Raumtemperatur.",
   },
   {
-    id: '2',
+    id: "2",
     image: require("../../assets/kraeuter.jpg"),
-    text: "Kräuter in einem Glas Wasser im Kühlschrank aufbewahren, um ihre Frische zu verlängern."
+    text: "Kräuter in einem Glas Wasser im Kühlschrank aufbewahren, um ihre Frische zu verlängern.",
   },
   {
-    id: '3',
+    id: "3",
     image: require("../../assets/brot.jpg"),
-    text: "Mit altem Brot lassen sich köstliche Croutons oder ein Brotauflauf zaubern."
+    text: "Mit altem Brot lassen sich köstliche Croutons oder ein Brotauflauf zaubern.",
   },
   {
-    id: '4',
+    id: "4",
     image: require("../../assets/bananen.jpg"),
-    text: "Bewahre Bananen getrennt von anderem Obst auf, da sie Ethylen abgeben und das Reifen anderer Früchte beschleunigen."
-  }
+    text: "Bewahre Bananen getrennt von anderem Obst auf, da sie Ethylen abgeben und das Reifen anderer Früchte beschleunigen.",
+  },
 ];
 
 const MyComponent = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
   const handleNextTip = () => {
@@ -97,7 +101,7 @@ const MyComponent = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.navButton,
-              currentTipIndex === 0 && styles.disabledButton
+              currentTipIndex === 0 && styles.disabledButton,
             ]}
             onPress={handlePrevTip}
             disabled={currentTipIndex === 0}
@@ -107,7 +111,7 @@ const MyComponent = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.navButton,
-              currentTipIndex === tips.length - 1 && styles.disabledButton
+              currentTipIndex === tips.length - 1 && styles.disabledButton,
             ]}
             onPress={handleNextTip}
             disabled={currentTipIndex === tips.length - 1}
@@ -134,6 +138,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    height: heightPercentageToDP(10),
     paddingTop: 15,
     paddingStart: 10,
   },
@@ -157,23 +162,23 @@ const styles = StyleSheet.create({
     paddingTop: 1,
   },
   imageContainer: {
-    overflow: 'hidden',
+    overflow: "hidden",
     borderRadius: 30,
-    alignItems: 'center',
+    alignItems: "center",
   },
   itemImage: {
     width: 250,
     height: 170,
     resizeMode: "cover",
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   recipeOfDay: {
     color: "#fff",
     fontWeight: "500",
     fontSize: 20,
     paddingBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   tipsContainer: {
     marginTop: 20,
@@ -181,20 +186,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#4d4a48",
     borderRadius: 10,
     marginHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   tipsHeader: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   tipCard: {
     backgroundColor: "#4d4a48",
     borderRadius: 10,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 10,
     maxWidth: 300, // Max width for the tip card
   },
@@ -207,12 +212,12 @@ const styles = StyleSheet.create({
   tipText: {
     fontSize: 16,
     color: "#fff",
-    textAlign: 'center',
+    textAlign: "center",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
     marginTop: 10,
   },
   navButton: {

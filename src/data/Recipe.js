@@ -21,13 +21,7 @@ const recipes = [
   {
     id: 3,
     name: "Sellerie-Eintopf",
-    ingredients: [
-      "Sellerie",
-      "Kartoffeln",
-      "Karotte",
-      "Zwiebel",
-      "Gemüsebrühe",
-    ],
+    ingredients: ["Sellerie", "Kartoffel", "Karotte", "Zwiebel", "Gemüsebrühe"],
     image: require("../../assets/recipes/sellerie-eintopf.png"),
   },
   {
@@ -35,11 +29,12 @@ const recipes = [
     name: "Gemischter Salat",
     ingredients: [
       "Salat",
-      "Tomaten",
-      "Gurken",
+      "Tomate",
+      "Gurke",
       "Paprika",
       "Zwiebel",
       "Olivenöl",
+      "Karotte",
     ],
     image: require("../../assets/recipes/mixed_salad.png"),
   },
@@ -65,7 +60,7 @@ const recipes = [
   {
     id: 7,
     name: "Kartoffelsuppe",
-    ingredients: ["Kartoffeln", "Karotte", "Zwiebel", "Gemüsebrühe", "Sahne"],
+    ingredients: ["Kartoffel", "Karotte", "Zwiebel", "Gemüsebrühe", "Sahne"],
     image: require("../../assets/recipes/Kartoffelsuppe.png"),
   },
   {

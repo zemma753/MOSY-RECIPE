@@ -17,6 +17,7 @@ import recipes from "../data/Recipe";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
 
   const findRecipesByIngredient = (ingredient) => {
     return recipes.filter((recipe) => recipe.ingredients.includes(ingredient));
@@ -27,10 +28,48 @@ const VorratScreen = ({ navigation }) => {
     setSelectedRecipes(matchedRecipes);
   };
 
+  /* ZEIGT REZEPTE AN DIE NUR DIESE ZUTATEN BEINHALTEN
+  
+  const handleSearch = () => {
+    
+    const searchIngredients = searchInput
+      .split(",")
+      .map((ingredient) => ingredient.trim());
+
+   
+    const matchedRecipes = recipes.filter((recipe) => {
+      return searchIngredients.every((ingredient) =>
+        recipe.ingredients.includes(ingredient)
+      );
+    });
+
+    setSelectedRecipes(matchedRecipes);
+  };
+  */
+
+  // ZEIGT REZEPTE AN DIE DIE MINDESTENS EINE DER ZUTATEN BEINHALTEN
+
+  const handleSearch = () => {
+    const searchIngredients = searchInput
+      .toLowerCase()
+      .split(",")
+      .map((ingredient) => ingredient.trim());
+
+    const matchedRecipes = recipes.filter((recipe) => {
+      return searchIngredients.some((ingredient) =>
+        recipe.ingredients.some((recipeIngredient) =>
+          recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
+        )
+      );
+    });
+
+    setSelectedRecipes(matchedRecipes);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Reste retten</Text>
@@ -40,14 +79,27 @@ const VorratScreen = ({ navigation }) => {
         <TextInput
           placeholder="Nach Zutaten suchen"
           placeholderTextColor="#6f6d62"
-          style={{ marginLeft: 15, fontSize: 18, color: "white" }}
+          style={{
+            marginLeft: 15,
+            fontSize: 18,
+            color: "white",
+            marginEnd: 130,
+          }}
+          value={searchInput}
+          onChangeText={(text) => {
+            setSearchInput(text);
+            handleSearch();
+          }}
+          //onSubmitEditing={handleSearch}
         />
+        <TouchableOpacity onPress={() => setSearchInput("")}>
+          <Ionicons name="close" size={25} color="#6f6d62" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         <Text style={styles.sectionTitle}>Häufig gesucht</Text>
         <View style={styles.itemsContainer}>
-          {/*HÄUFIG GESUCHTEN REZEPTEN */}
           <TouchableOpacity
             style={styles.item}
             onPress={() => handleIngredientPress("Karotte")}
@@ -98,9 +150,8 @@ const VorratScreen = ({ navigation }) => {
             />
             <Text style={styles.itemName}>Sellerie</Text>
           </TouchableOpacity>
-
-          {/* ENDE */}
         </View>
+
         <Text style={styles.sectionTitle}>Rezepte</Text>
         <View style={styles.itemsContainerbelow}>
           {selectedRecipes.map((recipe, index) => (
@@ -200,12 +251,13 @@ const styles = StyleSheet.create({
     height: 230,
     backgroundColor: "#4d4a48",
     borderRadius: 10,
-    // alignItems: "center",
+
     marginBottom: 20,
   },
   recipeName: {
     fontSize: 16,
     color: "#fff",
+    paddingStart: 10,
   },
   recipeImage: {
     width: widthPercentageToDP(46),
