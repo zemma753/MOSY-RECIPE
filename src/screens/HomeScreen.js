@@ -71,6 +71,7 @@ const MyComponent = ({ navigation }) => {
       </View>
 
       <View style={styles.middleContainer}>
+        <Text style={styles.recipeOfDay}> Rezept des Tages: </Text>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("RezepteScreen");
@@ -81,9 +82,7 @@ const MyComponent = ({ navigation }) => {
               source={require("../../assets/lasagne.jpg")}
               style={styles.itemImage}
               imageStyle={{ borderRadius: 30 }}
-            >
-              <Text style={styles.text}> Kalorienreiche Lasagne</Text>
-            </ImageBackground>
+            />
           </View>
         </TouchableOpacity>
       </View>
@@ -160,17 +159,21 @@ const styles = StyleSheet.create({
   imageContainer: {
     overflow: 'hidden',
     borderRadius: 30,
+    alignItems: 'center',
   },
   itemImage: {
     width: 250,
     height: 170,
     resizeMode: "cover",
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
-  text: {
+  recipeOfDay: {
     color: "#fff",
     fontWeight: "500",
     fontSize: 20,
-    marginTop: 20,
+    paddingBottom: 10,
+    textAlign: 'center',
   },
   tipsContainer: {
     marginTop: 20,
