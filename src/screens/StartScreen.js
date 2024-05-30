@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#9ACD32",
+    backgroundColor: "#353430",
     padding: 16,
   },
   lottie: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 22,
-    color: "#9ACD32",
+    color: "#191919",
     textAlign: "center",
     fontWeight: "bold",
   },

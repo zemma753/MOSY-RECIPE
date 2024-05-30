@@ -8,6 +8,8 @@ import VorratScreen from "../screens/VorratScreen";
 import FavoriteScreen from "../screens/FavoriteScreen";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import RezepteScreen from "../screens/RezepteScreen";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -16,11 +18,11 @@ function MainTabs() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      activeColor="black"
-      inactiveColor="gray"
-      barStyle={{ backgroundColor: "#CCFFCC" }}
-      shifting={false}
-      sceneContainerStyle={{ backgroundColor: "#ffffff" }}
+      activeColor="white"
+      inactiveColor="#988e73"
+      barStyle={{
+        backgroundColor: "#252421",
+      }}
     >
       <Tab.Screen
         name="Favorite"
@@ -44,10 +46,20 @@ function MainTabs() {
         name="Vorrat"
         options={{
           tabBarIcon: ({ color }) => (
-            <Ionicons name="home" color={color} size={24} />
+            <MaterialIcons name="kitchen" color={color} size={24} />
           ),
         }}
         component={VorratScreen}
+      />
+      <Tab.Screen
+        name="Rezepte"
+        component={RezepteScreen}
+        options={{
+          tabBarLabel: "Rezepte",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="restaurant-menu" color={color} size={24} />
+          ),
+        }}
       />
     </Tab.Navigator>
   );
