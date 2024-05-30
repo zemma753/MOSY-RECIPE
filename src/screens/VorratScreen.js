@@ -102,11 +102,16 @@ const VorratScreen = ({ navigation }) => {
           {/* ENDE */}
         </View>
         <Text style={styles.sectionTitle}>Rezepte</Text>
-        <View style={styles.itemsContainer}>
+        <View style={styles.itemsContainerbelow}>
           {selectedRecipes.map((recipe, index) => (
-            <View key={index} style={styles.recipeItem}>
+            <TouchableOpacity
+              key={index}
+              style={styles.recipeItem}
+              onPress={() => console.log("Recipe selected:", recipe.name)}
+            >
+              <Image source={recipe.image} style={styles.recipeImage} />
               <Text style={styles.recipeName}>{recipe.name}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -160,7 +165,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-evenly",
-    padding: 10,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  itemsContainerbelow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
   item: {
     flexDirection: "row",
@@ -183,14 +196,22 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   recipeItem: {
-    width: "100%",
-    padding: 10,
-    marginVertical: 5,
+    width: "48%",
+    height: 230,
     backgroundColor: "#4d4a48",
     borderRadius: 10,
+    // alignItems: "center",
+    marginBottom: 20,
   },
   recipeName: {
     fontSize: 16,
     color: "#fff",
+  },
+  recipeImage: {
+    width: widthPercentageToDP(46),
+    height: heightPercentageToDP(20),
+    resizeMode: "cover",
+    borderRadius: 10,
+    marginBottom: 5,
   },
 });
