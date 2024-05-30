@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,63 +13,101 @@ import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
+import recipes from "../data/Recipe";
 
 const VorratScreen = ({ navigation }) => {
+  const [selectedRecipes, setSelectedRecipes] = useState([]);
+
+  const findRecipesByIngredient = (ingredient) => {
+    return recipes.filter((recipe) => recipe.ingredients.includes(ingredient));
+  };
+
+  const handleIngredientPress = (ingredient) => {
+    const matchedRecipes = findRecipesByIngredient(ingredient);
+    setSelectedRecipes(matchedRecipes);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" color="white" size={25}></Ionicons>
+          <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Reste retten</Text>
       </View>
       <View style={styles.searchInput}>
-        <Ionicons name="search-sharp" size={25} color="#6f6d62"></Ionicons>
+        <Ionicons name="search-sharp" size={25} color="#6f6d62" />
         <TextInput
           placeholder="Nach Zutaten suchen"
           placeholderTextColor="#6f6d62"
-          style={{ marginLeft: 15, fontSize: 18 }}
+          style={{ marginLeft: 15, fontSize: 18, color: "white" }}
         />
       </View>
 
       <ScrollView style={styles.content}>
         <Text style={styles.sectionTitle}>Häufig gesucht</Text>
         <View style={styles.itemsContainer}>
+          {/*HÄUFIG GESUCHTEN REZEPTEN */}
           <TouchableOpacity
             style={styles.item}
-            onPress={() =>
-              navigation.navigate("Detail", { item: "Hackfleisch, gemischt" })
-            }
+            onPress={() => handleIngredientPress("Karotte")}
           >
             <Image
-              source={require("../../assets/favicon.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Hackfleisch, gemischt</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigation.navigate("Detail", { item: "Karotte" })}
-          >
-            <Image
-              source={require("../../assets/favicon.png")}
+              source={require("../../assets/ingredients/carrots.png")}
               style={styles.itemImage}
             />
             <Text style={styles.itemName}>Karotte</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.item}
-            onPress={() =>
-              navigation.navigate("Detail", { item: "Staudensellerie" })
-            }
+            onPress={() => handleIngredientPress("Paprika")}
           >
             <Image
-              source={require("../../assets/favicon.png")}
+              source={require("../../assets/ingredients/paprika.png")}
               style={styles.itemImage}
             />
-            <Text style={styles.itemName}>Staudensellerie</Text>
+            <Text style={styles.itemName}>Paprika</Text>
           </TouchableOpacity>
-          {/* Füge hier weitere Elemente hinzu */}
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => handleIngredientPress("Eier")}
+          >
+            <Image
+              source={require("../../assets/ingredients/eier.png")}
+              style={styles.itemImage}
+            />
+            <Text style={styles.itemName}>Ei</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => handleIngredientPress("Zwiebel")}
+          >
+            <Image
+              source={require("../../assets/ingredients/zwiebel.png")}
+              style={styles.itemImage}
+            />
+            <Text style={styles.itemName}>Zwiebel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => handleIngredientPress("Sellerie")}
+          >
+            <Image
+              source={require("../../assets/ingredients/sellerie.png")}
+              style={styles.itemImage}
+            />
+            <Text style={styles.itemName}>Sellerie</Text>
+          </TouchableOpacity>
+
+          {/* ENDE */}
+        </View>
+        <Text style={styles.sectionTitle}>Rezepte</Text>
+        <View style={styles.itemsContainer}>
+          {selectedRecipes.map((recipe, index) => (
+            <View key={index} style={styles.recipeItem}>
+              <Text style={styles.recipeName}>{recipe.name}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -94,11 +132,6 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     paddingStart: 10,
   },
-  backArrow: {
-    width: 20,
-    height: 20,
-    tintColor: "#fff",
-  },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
@@ -113,7 +146,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#4d4a48",
     borderRadius: 30,
   },
-
   content: {
     flex: 1,
   },
@@ -127,26 +159,38 @@ const styles = StyleSheet.create({
   itemsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-around",
+    justifyContent: "space-evenly",
     padding: 10,
   },
   item: {
-    width: 100,
-    height: 100,
-    margin: 5,
-    backgroundColor: "#333",
-    borderRadius: 10,
-    justifyContent: "center",
+    flexDirection: "row",
+    backgroundColor: "#4d4a48",
+    borderRadius: 50,
     alignItems: "center",
+    padding: 10,
+    margin: 5,
   },
   itemImage: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
+    width: 40,
+    height: 40,
+    resizeMode: "cover",
+    borderRadius: 20,
   },
   itemName: {
     fontSize: 14,
     color: "#fff",
-    marginTop: 5,
+    textAlign: "center",
+    marginLeft: 15,
+  },
+  recipeItem: {
+    width: "100%",
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: "#4d4a48",
+    borderRadius: 10,
+  },
+  recipeName: {
+    fontSize: 16,
+    color: "#fff",
   },
 });
