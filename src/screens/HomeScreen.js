@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,11 +8,50 @@ import {
   Image,
   ScrollView,
   ImageBackground,
+  Button,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+const tips = [
+  {
+    id: '1',
+    image: require("../../assets/obst.jpg"),
+    text: "Tomaten nicht im Kühlschrank aufbewahren, da sie so schneller an Geschmack verlieren. Lagere sie bei Raumtemperatur."
+  },
+  {
+    id: '2',
+    image: require("../../assets/kraeuter.jpg"),
+    text: "Kräuter in einem Glas Wasser im Kühlschrank aufbewahren, um ihre Frische zu verlängern."
+  },
+  {
+    id: '3',
+    image: require("../../assets/brot.jpg"),
+    text: "Mit altem Brot lassen sich köstliche Croutons oder ein Brotauflauf zaubern."
+  },
+  {
+    id: '4',
+    image: require("../../assets/bananen.jpg"),
+    text: "Bewahre Bananen getrennt von anderem Obst auf, da sie Ethylen abgeben und das Reifen anderer Früchte beschleunigen."
+  }
+];
+
 const MyComponent = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+  const handleNextTip = () => {
+    if (currentTipIndex < tips.length - 1) {
+      setCurrentTipIndex(currentTipIndex + 1);
+    }
+  };
+
+  const handlePrevTip = () => {
+    if (currentTipIndex > 0) {
+      setCurrentTipIndex(currentTipIndex - 1);
+    }
+  };
+
+  const currentTip = tips[currentTipIndex];
 
   return (
     <ScrollView style={styles.container}>
@@ -26,6 +65,8 @@ const MyComponent = ({ navigation }) => {
           placeholder="Nach Rezepten suchen"
           placeholderTextColor="#6f6d62"
           style={{ marginLeft: 15, fontSize: 18 }}
+          value={searchQuery}
+          onChangeText={(query) => setSearchQuery(query)}
         />
       </View>
 
@@ -49,29 +90,31 @@ const MyComponent = ({ navigation }) => {
 
       <View style={styles.tipsContainer}>
         <Text style={styles.tipsHeader}>Tipps und Tricks</Text>
-
-        <View style={styles.tipOfTheDay}>
-          <Image
-            source={require("../../assets/obst.jpg")}
-            style={styles.tipImage}
-          />
-          <Text style={styles.tipText}>
-            Tomaten nicht im Kühlschrank aufbewahren, da sie so schneller an Geschmack verlieren. Lagere sie bei Raumtemperatur.
-          </Text>
+        <View style={styles.tipCard}>
+          <Image source={currentTip.image} style={styles.tipImage} />
+          <Text style={styles.tipText}>{currentTip.text}</Text>
         </View>
-
-        <Text style={styles.tipsSubheader}>Weitere Tipps:</Text>
-
-        <View style={styles.slideShow}>
-          <Text style={styles.tipText}>
-            Kräuter in einem Glas Wasser im Kühlschrank aufbewahren, um ihre Frische zu verlängern.
-          </Text>
-          <Text style={styles.tipText}>
-            Mit altem Brot lassen sich köstliche Croutons oder ein Brotauflauf zaubern.
-          </Text>
-          <Text style={styles.tipText}>
-            Bewahre Bananen getrennt von anderem Obst auf, da sie Ethylen abgeben und das Reifen anderer Früchte beschleunigen.
-          </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              currentTipIndex === 0 && styles.disabledButton
+            ]}
+            onPress={handlePrevTip}
+            disabled={currentTipIndex === 0}
+          >
+            <Text style={styles.buttonText}>Zurück</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              currentTipIndex === tips.length - 1 && styles.disabledButton
+            ]}
+            onPress={handleNextTip}
+            disabled={currentTipIndex === tips.length - 1}
+          >
+            <Text style={styles.buttonText}>Weiter</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -84,38 +127,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#353430",
-  },
-  topContainer: {
-    marginTop: 40,
-    marginLeft: 10,
-    marginRight: 10,
-    paddingVertical: 0,
-    paddingBottom: 0,
-    borderWidth: 2,
-    borderColor: "black",
-    height: 60,
-    borderRadius: 6,
-    color: "black",
-    textAlign: "center",
-    fontSize: 30,
-    fontWeight: "bold",
-    fontColor: " #6f6d62",
-  },
-  middleContainer: {
-    marginTop: 20,
-    alignItems: "center",
-    paddingTop: 1,
-  },
-  bottomContainer: {
-    marginTop: 20,
-    alignItems: "center",
-    paddingTop: 1,
-  },
-  text: {
-    color: "#fff",
-    fontWeight: "500",
-    fontSize: 20,
-    marginTop: 60,
   },
   header: {
     backgroundColor: "#212121",
@@ -141,6 +152,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#4d4a48",
     borderRadius: 30,
   },
+  middleContainer: {
+    marginTop: 20,
+    alignItems: "center",
+    paddingTop: 1,
+  },
   imageContainer: {
     overflow: 'hidden',
     borderRadius: 30,
@@ -150,39 +166,62 @@ const styles = StyleSheet.create({
     height: 170,
     resizeMode: "cover",
   },
+  text: {
+    color: "#fff",
+    fontWeight: "500",
+    fontSize: 20,
+    marginTop: 20,
+  },
   tipsContainer: {
     marginTop: 20,
     padding: 20,
     backgroundColor: "#4d4a48",
     borderRadius: 10,
     marginHorizontal: 20,
+    alignItems: 'center',
   },
   tipsHeader: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 10,
+    textAlign: 'center',
   },
-  tipOfTheDay: {
-    marginBottom: 20,
+  tipCard: {
+    backgroundColor: "#4d4a48",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    marginVertical: 10,
+    maxWidth: 300, // Max width for the tip card
   },
   tipImage: {
-    width: "100%",
-    height: 150,
+    width: 200,
+    height: 200,
     borderRadius: 10,
     marginBottom: 10,
   },
   tipText: {
     fontSize: 16,
     color: "#fff",
+    textAlign: 'center',
   },
-  tipsSubheader: {
-    fontSize: 18,
-    fontWeight: "bold",
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginTop: 10,
+  },
+  navButton: {
+    backgroundColor: "#6f6d62",
+    padding: 10,
+    borderRadius: 5,
+  },
+  disabledButton: {
+    backgroundColor: "#9c9a93",
+  },
+  buttonText: {
     color: "#fff",
-    marginBottom: 10,
-  },
-  slideShow: {
-    marginBottom: 20,
+    fontSize: 16,
   },
 });
