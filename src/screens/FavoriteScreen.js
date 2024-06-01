@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,7 +13,7 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 
-const favorites = [
+const initialFavorites = [
   { id: '1', name: 'Omlett', image: require('../../assets/omlett.jpg') },
   { id: '2', name: 'Kartoffelauflauf', image: require('../../assets/kartoffelauflauf.jpg') },
   { id: '3', name: 'Lasagne', image: require('../../assets/lasagne.jpg') },
@@ -23,18 +23,26 @@ const favorites = [
 ];
 
 export default function FavoriteScreen({ navigation }) {
+  const [favorites, setFavorites] = useState(initialFavorites);
+
   const handleRecipePress = (item) => {
     // Hier die Navigation oder eine andere Aktion hinzufügen
   };
 
+  const toggleFavorite = (item) => {
+    setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== item.id));
+  };
+
   const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleRecipePress(item)}>
-      <View style={styles.itemContainer}>
-        <Ionicons name="star-outline" size={25} color="black" style={styles.icon} />
+    <View style={styles.itemContainer}>
+      <TouchableOpacity onPress={() => toggleFavorite(item)}>
+        <Ionicons name="star" size={25} color="black" style={styles.icon} />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleRecipePress(item)} style={styles.itemContent}>
         <Image source={item.image} style={styles.itemImage} />
         <Text style={styles.itemText}>{item.name}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -90,6 +98,10 @@ const styles = StyleSheet.create({
   },
   icon: {
     paddingHorizontal: 10,
+  },
+  itemContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   itemImage: {
     width: 50,

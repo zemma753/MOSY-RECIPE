@@ -42,6 +42,7 @@ const tips = [
 const MyComponent = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleNextTip = () => {
     if (currentTipIndex < tips.length - 1) {
@@ -55,7 +56,13 @@ const MyComponent = ({ navigation }) => {
     }
   };
 
-  const currentTip = tips[currentTipIndex];
+  const currentTip = tips[currentTipIndex] || {};
+
+
+
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -86,7 +93,11 @@ const MyComponent = ({ navigation }) => {
               source={require("../../assets/lasagne.jpg")}
               style={styles.itemImage}
               imageStyle={{ borderRadius: 30 }}
-            />
+            >
+              <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
+                <Ionicons name={isFavorite ? "star" : "star-outline"} size={30} color={isFavorite ? "gold" : "white"} />
+              </TouchableOpacity>
+            </ImageBackground>
           </View>
         </TouchableOpacity>
       </View>
@@ -219,6 +230,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "80%",
     marginTop: 10,
+    padding: 10,
   },
   navButton: {
     backgroundColor: "#6f6d62",
@@ -231,5 +243,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
 });
