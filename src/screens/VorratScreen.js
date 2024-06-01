@@ -14,13 +14,18 @@ import {
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import recipes from "../data/Recipe";
+import { Feather } from "@expo/vector-icons";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
 
   const findRecipesByIngredient = (ingredient) => {
-    return recipes.filter((recipe) => recipe.ingredients.includes(ingredient));
+    return recipes.filter((recipe) =>
+      recipe.ingredients.some((recipeIngredient) =>
+        recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
+      )
+    );
   };
 
   const handleIngredientPress = (ingredient) => {
@@ -28,28 +33,38 @@ const VorratScreen = ({ navigation }) => {
     setSelectedRecipes(matchedRecipes);
   };
 
-  /* ZEIGT REZEPTE AN DIE NUR DIESE ZUTATEN BEINHALTEN
-  
+  //ZEIGT REZEPTE AN DIE NUR DIESE ZUTATEN BEINHALTEN
+
   const handleSearch = () => {
-    
     const searchIngredients = searchInput
+      .toLowerCase()
       .split(",")
       .map((ingredient) => ingredient.trim());
 
-   
-    const matchedRecipes = recipes.filter((recipe) => {
-      return searchIngredients.every((ingredient) =>
-        recipe.ingredients.includes(ingredient)
-      );
-    });
+    // ZEIGT REZEPTE AN DIE DIE MINDESTENS EINE DER ZUTATEN BEINHALTEN
+    const matchedRecipesWithAnyIngredient = recipes.filter((recipe) =>
+      searchIngredients.some((ingredient) =>
+        recipe.ingredients.some((recipeIngredient) =>
+          recipeIngredient.toLowerCase().includes(ingredient)
+        )
+      )
+    );
+
+    // ZEIGT REZEPTE AN DIE NUR DIE ANGEGEBENEN ZUTATEN BEINHALTEN
+    const matchedRecipes = matchedRecipesWithAnyIngredient.filter((recipe) =>
+      searchIngredients.every((ingredient) =>
+        recipe.ingredients.some((recipeIngredient) =>
+          recipeIngredient.toLowerCase().includes(ingredient)
+        )
+      )
+    );
 
     setSelectedRecipes(matchedRecipes);
   };
-  */
 
   // ZEIGT REZEPTE AN DIE DIE MINDESTENS EINE DER ZUTATEN BEINHALTEN
 
-  const handleSearch = () => {
+  /*const handleSearch = () => {
     const searchIngredients = searchInput
       .toLowerCase()
       .split(",")
@@ -64,6 +79,11 @@ const VorratScreen = ({ navigation }) => {
     });
 
     setSelectedRecipes(matchedRecipes);
+  };
+  */
+
+  const handleRecipePress = (recipe) => {
+    navigation.navigate("RecipeDetail", { recipe });
   };
 
   return (
@@ -83,14 +103,13 @@ const VorratScreen = ({ navigation }) => {
             marginLeft: 15,
             fontSize: 18,
             color: "white",
-            marginEnd: 130,
+            flex: 1,
           }}
           value={searchInput}
           onChangeText={(text) => {
             setSearchInput(text);
             handleSearch();
           }}
-          //onSubmitEditing={handleSearch}
         />
         <TouchableOpacity onPress={() => setSearchInput("")}>
           <Ionicons name="close" size={25} color="#6f6d62" />
@@ -122,7 +141,7 @@ const VorratScreen = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.item}
-            onPress={() => handleIngredientPress("Eier")}
+            onPress={() => handleIngredientPress("Ei")}
           >
             <Image
               source={require("../../assets/ingredients/eier.png")}
@@ -158,10 +177,19 @@ const VorratScreen = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={styles.recipeItem}
-              onPress={() => console.log("Recipe selected:", recipe.name)}
+              onPress={() => handleRecipePress(recipe)}
             >
               <Image source={recipe.image} style={styles.recipeImage} />
               <Text style={styles.recipeName}>{recipe.name}</Text>
+              <View style={styles.recipetimeContainer}>
+                <Feather
+                  name="clock"
+                  size={24}
+                  color="#6f6d62"
+                  style={styles.recipeTime}
+                />
+                <Text style={styles.recipeTime}>{recipe.time} Min</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -199,7 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     padding: 10,
     margin: 20,
-    backgroundColor: "#4d4a48",
+    backgroundColor: "#252421",
     borderRadius: 30,
   },
   content: {
@@ -217,7 +245,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-evenly",
     paddingHorizontal: 10,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   itemsContainerbelow: {
     flexDirection: "row",
@@ -228,7 +256,7 @@ const styles = StyleSheet.create({
   },
   item: {
     flexDirection: "row",
-    backgroundColor: "#4d4a48",
+    backgroundColor: "#252421",
     borderRadius: 50,
     alignItems: "center",
     padding: 10,
@@ -248,16 +276,16 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     width: "48%",
-    height: 230,
-    backgroundColor: "#4d4a48",
+    height: heightPercentageToDP(32),
+    backgroundColor: "#252421",
     borderRadius: 10,
-
     marginBottom: 20,
   },
   recipeName: {
     fontSize: 16,
     color: "#fff",
-    paddingStart: 10,
+    margin: 9,
+    marginBottom: 30,
   },
   recipeImage: {
     width: widthPercentageToDP(46),
@@ -265,5 +293,15 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     borderRadius: 10,
     marginBottom: 5,
+  },
+  recipetimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+
+  recipeTime: {
+    paddingStart: 10,
+    color: "#6f6d62",
   },
 });

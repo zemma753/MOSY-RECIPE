@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -6,6 +5,7 @@ import HomeScreen from "../screens/HomeScreen";
 import StartScreen from "../screens/StartScreen";
 import VorratScreen from "../screens/VorratScreen";
 import FavoriteScreen from "../screens/FavoriteScreen";
+import RecipeDetailScreen from "../components/RecipeDetailScreen";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import RezepteScreen from "../screens/RezepteScreen";
@@ -20,9 +20,7 @@ function MainTabs() {
       initialRouteName="Home"
       activeColor="white"
       inactiveColor="#988e73"
-      barStyle={{
-        backgroundColor: "#252421",
-      }}
+      barStyle={{ backgroundColor: "#252421" }}
     >
       <Tab.Screen
         name="Home"
@@ -77,6 +75,11 @@ export default function AppNavigation() {
         <Stack.Screen
           name="Main"
           component={MainTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="RecipeDetail"
+          component={RecipeDetailScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
