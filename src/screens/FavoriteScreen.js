@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  Image,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -13,24 +14,24 @@ import {
 } from "react-native-responsive-screen";
 
 const favorites = [
-  { id: '1', name: 'Omlett' },
-  { id: '2', name: 'Kartoffelauflauf' },
-  { id: '3', name: 'Lasagne' },
-  { id: '4', name: 'Nudelsalat' },
-  { id: '5', name: 'Bulgur Reis' },
+  { id: '1', name: 'Omlett', image: require('../../assets/omlett.jpg') },
+  { id: '2', name: 'Kartoffelauflauf', image: require('../../assets/kartoffelauflauf.jpg') },
+  { id: '3', name: 'Lasagne', image: require('../../assets/lasagne.jpg') },
+  { id: '4', name: 'Nudelsalat', image: require('../../assets/Nudelsalat.jpg') },
+  { id: '5', name: 'Bulgur Reis', image: require('../../assets/bulgur.jpg') },
   // Weitere Platzhalter für Rezepte
 ];
 
 export default function FavoriteScreen({ navigation }) {
   const handleRecipePress = (item) => {
     // Hier die Navigation oder eine andere Aktion hinzufügen
-
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleRecipePress(item)}>
       <View style={styles.itemContainer}>
         <Ionicons name="star-outline" size={25} color="black" style={styles.icon} />
+        <Image source={item.image} style={styles.itemImage} />
         <Text style={styles.itemText}>{item.name}</Text>
       </View>
     </TouchableOpacity>
@@ -90,9 +91,15 @@ const styles = StyleSheet.create({
   icon: {
     paddingHorizontal: 10,
   },
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginLeft: 10,
+  },
   itemText: {
     fontSize: 18,
     color: "#fff",
-    marginLeft: 10, // Abstand zwischen Stern und Text
+    marginLeft: 10, // Abstand zwischen Bild und Text
   },
 });
