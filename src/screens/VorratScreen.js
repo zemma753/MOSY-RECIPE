@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,74 +13,29 @@ import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
-import recipes from "../data/Recipe";
 import { Feather } from "@expo/vector-icons";
+import { findRecipesByIngredient } from "../data/API";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
 
-  const findRecipesByIngredient = (ingredient) => {
-    return recipes.filter((recipe) =>
-      recipe.ingredients.some((recipeIngredient) =>
-        recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
-      )
-    );
+  useEffect(() => {
+    if (searchInput.length > 0) {
+      handleSearch();
+    } else {
+      setSelectedRecipes([]);
+    }
+  }, [searchInput]);
+
+  const handleSearch = async () => {
+    try {
+      const recipes = await findRecipesByIngredient(searchInput);
+      setSelectedRecipes(recipes);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
   };
-
-  const handleIngredientPress = (ingredient) => {
-    const matchedRecipes = findRecipesByIngredient(ingredient);
-    setSelectedRecipes(matchedRecipes);
-  };
-
-  //ZEIGT REZEPTE AN DIE NUR DIESE ZUTATEN BEINHALTEN
-
-  const handleSearch = () => {
-    const searchIngredients = searchInput
-      .toLowerCase()
-      .split(",")
-      .map((ingredient) => ingredient.trim());
-
-    // ZEIGT REZEPTE AN DIE DIE MINDESTENS EINE DER ZUTATEN BEINHALTEN
-    const matchedRecipesWithAnyIngredient = recipes.filter((recipe) =>
-      searchIngredients.some((ingredient) =>
-        recipe.ingredients.some((recipeIngredient) =>
-          recipeIngredient.toLowerCase().includes(ingredient)
-        )
-      )
-    );
-
-    // ZEIGT REZEPTE AN DIE NUR DIE ANGEGEBENEN ZUTATEN BEINHALTEN
-    const matchedRecipes = matchedRecipesWithAnyIngredient.filter((recipe) =>
-      searchIngredients.every((ingredient) =>
-        recipe.ingredients.some((recipeIngredient) =>
-          recipeIngredient.toLowerCase().includes(ingredient)
-        )
-      )
-    );
-
-    setSelectedRecipes(matchedRecipes);
-  };
-
-  // ZEIGT REZEPTE AN DIE DIE MINDESTENS EINE DER ZUTATEN BEINHALTEN
-
-  /*const handleSearch = () => {
-    const searchIngredients = searchInput
-      .toLowerCase()
-      .split(",")
-      .map((ingredient) => ingredient.trim());
-
-    const matchedRecipes = recipes.filter((recipe) => {
-      return searchIngredients.some((ingredient) =>
-        recipe.ingredients.some((recipeIngredient) =>
-          recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
-        )
-      );
-    });
-
-    setSelectedRecipes(matchedRecipes);
-  };
-  */
 
   const handleRecipePress = (recipe) => {
     navigation.navigate("RecipeDetail", { recipe });
@@ -106,10 +61,7 @@ const VorratScreen = ({ navigation }) => {
             flex: 1,
           }}
           value={searchInput}
-          onChangeText={(text) => {
-            setSearchInput(text);
-            handleSearch();
-          }}
+          onChangeText={(text) => setSearchInput(text)}
         />
         <TouchableOpacity onPress={() => setSearchInput("")}>
           <Ionicons name="close" size={25} color="#6f6d62" />
@@ -117,78 +69,33 @@ const VorratScreen = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Häufig gesucht</Text>
-        <View style={styles.itemsContainer}>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => handleIngredientPress("Karotte")}
-          >
-            <Image
-              source={require("../../assets/ingredients/carrots.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Karotte</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => handleIngredientPress("Paprika")}
-          >
-            <Image
-              source={require("../../assets/ingredients/paprika.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Paprika</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => handleIngredientPress("Ei")}
-          >
-            <Image
-              source={require("../../assets/ingredients/eier.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Ei</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => handleIngredientPress("Zwiebel")}
-          >
-            <Image
-              source={require("../../assets/ingredients/zwiebel.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Zwiebel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => handleIngredientPress("Sellerie")}
-          >
-            <Image
-              source={require("../../assets/ingredients/sellerie.png")}
-              style={styles.itemImage}
-            />
-            <Text style={styles.itemName}>Sellerie</Text>
-          </TouchableOpacity>
-        </View>
-
         <Text style={styles.sectionTitle}>Rezepte</Text>
         <View style={styles.itemsContainerbelow}>
-          {selectedRecipes.map((recipe, index) => (
+          {selectedRecipes.map((recipeData, index) => (
             <TouchableOpacity
               key={index}
               style={styles.recipeItem}
-              onPress={() => handleRecipePress(recipe)}
+              onPress={() => handleRecipePress(recipeData.recipe)}
             >
-              <Image source={recipe.image} style={styles.recipeImage} />
-              <Text style={styles.recipeName}>{recipe.name}</Text>
-              <View style={styles.recipetimeContainer}>
-                <Feather
-                  name="clock"
-                  size={24}
-                  color="#6f6d62"
-                  style={styles.recipeTime}
-                />
-                <Text style={styles.recipeTime}>{recipe.time} Min</Text>
+              <Image
+                source={{ uri: recipeData.recipe.image }}
+                style={styles.recipeImage}
+              />
+              <View style={styles.recipeDetails}>
+                <Text style={styles.recipeName}>{recipeData.recipe.label}</Text>
+                <View style={styles.recipetimeContainer}>
+                  <Feather
+                    name="clock"
+                    size={18}
+                    color="#6f6d62"
+                    style={styles.recipeTimeIcon}
+                  />
+                  <Text style={styles.recipeTime}>
+                    {recipeData.recipe.totalTime > 0
+                      ? `${recipeData.recipe.totalTime} Min`
+                      : "-"}
+                  </Text>
+                </View>
               </View>
             </TouchableOpacity>
           ))}
@@ -240,13 +147,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
   },
-  itemsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-evenly",
-    paddingHorizontal: 10,
-    marginBottom: 5,
-  },
   itemsContainerbelow: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -254,54 +154,40 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-  item: {
-    flexDirection: "row",
-    backgroundColor: "#252421",
-    borderRadius: 50,
-    alignItems: "center",
-    padding: 10,
-    margin: 5,
-  },
-  itemImage: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover",
-    borderRadius: 20,
-  },
-  itemName: {
-    fontSize: 14,
-    color: "#fff",
-    textAlign: "center",
-    marginLeft: 15,
-  },
   recipeItem: {
-    width: "48%",
-    height: heightPercentageToDP(32),
+    width: "48.5%",
+    height: 270,
     backgroundColor: "#252421",
     borderRadius: 10,
     marginBottom: 20,
   },
-  recipeName: {
-    fontSize: 16,
-    color: "#fff",
-    margin: 9,
-    marginBottom: 30,
-  },
   recipeImage: {
-    width: widthPercentageToDP(46),
-    height: heightPercentageToDP(20),
+    width: "100%",
+    height: "65%",
     resizeMode: "cover",
     borderRadius: 10,
     marginBottom: 5,
+  },
+  recipeDetails: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+  recipeName: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  recipeTime: {
+    fontSize: 14,
+    color: "#6f6d62",
+  },
+  recipeTimeIcon: {
+    marginRight: 5,
   },
   recipetimeContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-  },
-
-  recipeTime: {
-    paddingStart: 10,
-    color: "#6f6d62",
+    marginBottom: 10,
   },
 });
