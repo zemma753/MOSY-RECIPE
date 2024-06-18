@@ -8,13 +8,8 @@ import {
   Image,
   ScrollView,
   ImageBackground,
-  Button,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import {
-  widthPercentageToDP,
-  heightPercentageToDP,
-} from "react-native-responsive-screen";
 
 const tips = [
   {
@@ -39,7 +34,7 @@ const tips = [
   },
 ];
 
-const MyComponent = ({ navigation }) => {
+const HomeScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -58,8 +53,6 @@ const MyComponent = ({ navigation }) => {
 
   const currentTip = tips[currentTipIndex] || {};
 
-
-
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
@@ -68,6 +61,9 @@ const MyComponent = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Recipe Saver</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("ShoppingList")}>
+          <Ionicons name="cart" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchInput}>
@@ -83,11 +79,7 @@ const MyComponent = ({ navigation }) => {
 
       <View style={styles.middleContainer}>
         <Text style={styles.recipeOfDay}> Rezept des Tages: </Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("RezepteScreen");
-          }}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("RezepteScreen")}>
           <View style={styles.imageContainer}>
             <ImageBackground
               source={require("../../assets/lasagne.jpg")}
@@ -95,7 +87,11 @@ const MyComponent = ({ navigation }) => {
               imageStyle={{ borderRadius: 30 }}
             >
               <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
-                <Ionicons name={isFavorite ? "star" : "star-outline"} size={30} color={isFavorite ? "gold" : "white"} />
+                <Ionicons
+                  name={isFavorite ? "star" : "star-outline"}
+                  size={30}
+                  color={isFavorite ? "gold" : "white"}
+                />
               </TouchableOpacity>
             </ImageBackground>
           </View>
@@ -110,14 +106,11 @@ const MyComponent = ({ navigation }) => {
         </View>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[
-              styles.navButton,
-              currentTipIndex === 0 && styles.disabledButton,
-            ]}
+            style={[styles.navButton, currentTipIndex === 0 && styles.disabledButton]}
             onPress={handlePrevTip}
             disabled={currentTipIndex === 0}
           >
-            <Text style={styles.buttonText}>Zurück</Text>
+            <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -127,15 +120,13 @@ const MyComponent = ({ navigation }) => {
             onPress={handleNextTip}
             disabled={currentTipIndex === tips.length - 1}
           >
-            <Text style={styles.buttonText}>Weiter</Text>
+            <Ionicons name="arrow-forward" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
   );
 };
-
-export default MyComponent;
 
 const styles = StyleSheet.create({
   container: {
@@ -148,16 +139,14 @@ const styles = StyleSheet.create({
     borderBottomColor: "#424242",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    height: heightPercentageToDP(10),
-    paddingTop: 15,
-    paddingStart: 10,
+    justifyContent: "space-between", // Changed from "flex-start" to "space-between"
+    height: 60,
+    paddingHorizontal: 10,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginLeft: 15,
   },
   searchInput: {
     flexDirection: "row",
@@ -245,8 +234,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   favoriteButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
   },
 });
+
+export default HomeScreen;

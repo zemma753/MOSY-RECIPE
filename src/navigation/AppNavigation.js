@@ -9,11 +9,13 @@ import RecipeDetailScreen from "../components/RecipeDetailScreen";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import RezepteScreen from "../screens/RezepteScreen";
+import ShoppingListScreen from "../screens/ShoppingListScreen";
 import { MaterialIcons } from "@expo/vector-icons";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
+// Tab-Navigation für die Hauptscreens
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -63,7 +65,7 @@ function MainTabs() {
   );
 }
 
-export default function AppNavigation() {
+const AppNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -82,7 +84,14 @@ export default function AppNavigation() {
           component={RecipeDetailScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="ShoppingList"
+          component={ShoppingListScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
-}
+};
+
+export default AppNavigation;
