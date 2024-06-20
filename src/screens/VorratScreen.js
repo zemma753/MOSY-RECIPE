@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,31 +14,43 @@ import {
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import { Feather } from "@expo/vector-icons";
-import { findRecipesByIngredient } from "../data/API";
+import { findRecipesByIngredient, getRecipeDetailsById } from "../data/API";
+import debounce from "lodash.debounce";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
 
+  const handleSearch = useCallback(
+    debounce(async (input) => {
+      if (input.length > 0) {
+        try {
+          const ingredients = input
+            .split(",")
+            .map((ingredient) => ingredient.trim());
+          const recipes = await findRecipesByIngredient(ingredients);
+          setSelectedRecipes(recipes);
+        } catch (error) {
+          console.error("Error fetching recipes:", error);
+        }
+      } else {
+        setSelectedRecipes([]);
+      }
+    }, 500),
+    []
+  );
+
   useEffect(() => {
-    if (searchInput.length > 0) {
-      handleSearch();
-    } else {
-      setSelectedRecipes([]);
-    }
+    handleSearch(searchInput);
   }, [searchInput]);
 
-  const handleSearch = async () => {
+  const handleRecipePress = async (id) => {
     try {
-      const recipes = await findRecipesByIngredient(searchInput);
-      setSelectedRecipes(recipes);
+      const recipe = await getRecipeDetailsById(id);
+      navigation.navigate("RecipeDetail", { recipe });
     } catch (error) {
-      console.error("Error fetching recipes:", error);
+      console.error("Error fetching recipe details:", error);
     }
-  };
-
-  const handleRecipePress = (recipe) => {
-    navigation.navigate("RecipeDetail", { recipe });
   };
 
   return (
@@ -47,7 +59,7 @@ const VorratScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Reste retten</Text>
+        <Text style={styles.headerText}>Saving leftovers</Text>
       </View>
       <View style={styles.searchInput}>
         <Ionicons name="search-sharp" size={25} color="#6f6d62" />
@@ -69,36 +81,22 @@ const VorratScreen = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Rezepte</Text>
+        <Text style={styles.sectionTitle}>Recipes</Text>
         <View style={styles.itemsContainerbelow}>
-          {selectedRecipes.map((recipeData, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.recipeItem}
-              onPress={() => handleRecipePress(recipeData.recipe)}
-            >
-              <Image
-                source={{ uri: recipeData.recipe.image }}
-                style={styles.recipeImage}
-              />
-              <View style={styles.recipeDetails}>
-                <Text style={styles.recipeName}>{recipeData.recipe.label}</Text>
-                <View style={styles.recipetimeContainer}>
-                  <Feather
-                    name="clock"
-                    size={18}
-                    color="#6f6d62"
-                    style={styles.recipeTimeIcon}
-                  />
-                  <Text style={styles.recipeTime}>
-                    {recipeData.recipe.totalTime > 0
-                      ? `${recipeData.recipe.totalTime} Min`
-                      : "-"}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {selectedRecipes &&
+            selectedRecipes.map((recipe, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.recipeItem}
+                onPress={() => handleRecipePress(recipe.id)}
+              >
+                <Image
+                  source={{ uri: recipe.image }}
+                  style={styles.recipeImage}
+                />
+                <Text style={styles.recipeName}>{recipe.title}</Text>
+              </TouchableOpacity>
+            ))}
         </View>
       </ScrollView>
     </View>
@@ -161,6 +159,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
   },
+  recipeName: {
+    fontSize: 16,
+    color: "#fff",
+    paddingStart: 10,
+  },
   recipeImage: {
     width: "100%",
     height: "65%",
@@ -168,26 +171,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
-  recipeDetails: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-  },
-  recipeName: {
-    fontSize: 16,
-    color: "#fff",
-  },
   recipeTime: {
-    fontSize: 14,
+    paddingStart: 10,
+    paddingTop: 20,
     color: "#6f6d62",
   },
-  recipeTimeIcon: {
-    marginRight: 5,
-  },
+
   recipetimeContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    marginBottom: 10,
   },
 });
