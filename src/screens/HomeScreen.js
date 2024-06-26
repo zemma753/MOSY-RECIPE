@@ -98,7 +98,7 @@ const HomeScreen = ({ navigation }) => {
           <TextInput
             placeholder="Nach Rezepten suchen"
             placeholderTextColor="#6f6d62"
-            style={{ marginLeft: 15, fontSize: 18 }}
+            style={{ marginLeft: 15, fontSize: 18, color: "white" }}
             value={searchQuery}
             onChangeText={(query) => setSearchQuery(query)}
           />
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginRight: "50%",
+    marginRight: "48%",
     marginLeft: 15,
   },
   searchInput: {

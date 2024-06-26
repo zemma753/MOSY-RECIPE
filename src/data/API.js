@@ -3,8 +3,12 @@ import { SPOONACULAR_API_KEY } from "./Config";
 
 const api = axios.create({
   baseURL: "https://api.spoonacular.com/recipes",
+  params: {
+    apiKey: SPOONACULAR_API_KEY,
+  },
 });
 
+// Suche nach Rezepten anhand von Zutaten
 export const findRecipesByIngredient = async (ingredients) => {
   try {
     const response = await api.get(`/findByIngredients`, {
@@ -14,13 +18,24 @@ export const findRecipesByIngredient = async (ingredients) => {
         apiKey: SPOONACULAR_API_KEY,
       },
     });
-    return response.data;
+    const recipeDetailsPromises = response.data.map(async (recipe) => {
+      const detailsResponse = await getRecipeDetailsById(recipe.id);
+      return {
+        id: recipe.id,
+        title: recipe.title,
+        image: recipe.image,
+        readyInMinutes: detailsResponse.readyInMinutes,
+      };
+    });
+
+    return await Promise.all(recipeDetailsPromises);
   } catch (error) {
     console.error("Error fetching recipes:", error);
     throw error;
   }
 };
 
+// Abrufen von Rezeptdetails anhand der ID
 export const getRecipeDetailsById = async (id) => {
   try {
     const response = await api.get(`/${id}/information`, {
@@ -39,9 +54,9 @@ export const findRecipesByName = async (query) => {
   try {
     const response = await api.get(`/complexSearch`, {
       params: {
+        apiKey: SPOONACULAR_API_KEY,
         query: query,
         number: 10,
-        apiKey: SPOONACULAR_API_KEY,
       },
     });
     return response.data.results;
@@ -56,7 +71,6 @@ export const getRandomRecipes = async () => {
     const response = await api.get("/random", {
       params: {
         number: 5, // Anzahl der zufälligen Rezepte
-        apiKey: SPOONACULAR_API_KEY,
       },
     });
     return response.data.recipes;
@@ -64,4 +78,8 @@ export const getRandomRecipes = async () => {
     console.error("Error fetching random recipes:", error);
     throw error;
   }
+};
+
+export const getIngredientImageUrl = (ingredient) => {
+  return `https://spoonacular.com/cdn/ingredients_100x100/${ingredient}.jpg`;
 };

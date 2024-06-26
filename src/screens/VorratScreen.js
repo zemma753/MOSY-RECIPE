@@ -81,7 +81,6 @@ const VorratScreen = ({ navigation }) => {
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sectionTitle}>Recipes</Text>
         <View style={styles.itemsContainerbelow}>
           {selectedRecipes &&
             selectedRecipes.map((recipe, index) => (
@@ -95,6 +94,19 @@ const VorratScreen = ({ navigation }) => {
                   style={styles.recipeImage}
                 />
                 <Text style={styles.recipeName}>{recipe.title}</Text>
+                <View style={styles.recipetimeContainer}>
+                  <Feather
+                    name="clock"
+                    size={24}
+                    color="#6f6d62"
+                    style={styles.recipeTimeIcon}
+                  />
+                  <Text style={styles.recipeTime}>
+                    {recipe.readyInMinutes
+                      ? `${recipe.readyInMinutes} Min`
+                      : "N/A"}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
         </View>
@@ -154,10 +166,11 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     width: "48.5%",
-    height: 270,
+    height: 290,
     backgroundColor: "#252421",
     borderRadius: 10,
     marginBottom: 20,
+    justifyContent: "space-between",
   },
   recipeName: {
     fontSize: 16,
@@ -171,15 +184,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
-  recipeTime: {
-    paddingStart: 10,
-    paddingTop: 20,
-    color: "#6f6d62",
-  },
-
   recipetimeContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
+    paddingLeft: 10, // Adjust padding to ensure alignment
+    paddingBottom: 10, // Adjust padding to ensure alignment
+  },
+  recipeTimeIcon: {
+    paddingRight: 5, // Adjust padding to ensure alignment
+  },
+  recipeTime: {
+    color: "#6f6d62",
   },
 });

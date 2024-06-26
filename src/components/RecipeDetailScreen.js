@@ -135,7 +135,6 @@ const RecipeDetailScreen = ({ navigation, route }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>{recipeDetails.title}</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <Image

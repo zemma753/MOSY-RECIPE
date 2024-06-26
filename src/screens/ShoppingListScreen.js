@@ -6,8 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  Image,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import {
   widthPercentageToDP,
   heightPercentageToDP,
@@ -16,17 +17,36 @@ import {
 const ShoppingListScreen = ({ navigation }) => {
   const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState("");
+  const [itemQuantity, setItemQuantity] = useState("");
 
   const handleAddItem = () => {
-    if (itemName.trim() !== "") {
-      setItems([...items, { id: Date.now().toString(), name: itemName }]);
+    if (itemName.trim() !== "" && itemQuantity.trim() !== "") {
+      setItems([
+        ...items,
+        {
+          id: Date.now().toString(),
+          name: itemName,
+          quantity: itemQuantity,
+          completed: false,
+        },
+      ]);
       setItemName("");
+      setItemQuantity("");
     }
   };
 
-  const handleDeleteItem = (id) => {
-    const filteredItems = items.filter((item) => item.id !== id);
-    setItems(filteredItems);
+  const handleCompleteItem = (id) => {
+    const updatedItems = items.map((item) => {
+      if (item.id === id) {
+        return { ...item, completed: !item.completed };
+      }
+      return item;
+    });
+    setItems(updatedItems);
+  };
+
+  const handleClearAllItems = () => {
+    setItems([]);
   };
 
   return (
@@ -36,33 +56,61 @@ const ShoppingListScreen = ({ navigation }) => {
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerText}>ShoppingList</Text>
-      </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Neues Element hinzufügen"
-          placeholderTextColor="#aaa"
-          value={itemName}
-          onChangeText={(text) => setItemName(text)}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-          <Ionicons name="add" size={24} color="white" />
+        <TouchableOpacity
+          style={{ alignItems: "flex-end", margin: 10 }}
+          onPress={handleClearAllItems}
+        >
+          <Feather name="trash-2" size={29} color="white" />
         </TouchableOpacity>
       </View>
+
       <FlatList
         style={styles.list}
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Text style={styles.itemText}>{item.name}</Text>
-            <TouchableOpacity onPress={() => handleDeleteItem(item.id)}>
-              <Ionicons name="trash" size={24} color="#FF6347" />
+            <Image
+              source={{
+                uri: `https://spoonacular.com/cdn/ingredients_100x100/${item.name}.jpg`,
+              }}
+              style={styles.itemImage}
+            />
+            <View style={styles.itemDetails}>
+              <Text style={styles.itemText}>{item.name}</Text>
+              <Text style={styles.itemQuantity}>{item.quantity} x</Text>
+            </View>
+            <TouchableOpacity onPress={() => handleCompleteItem(item.id)}>
+              <View style={styles.circle}>
+                {item.completed && (
+                  <Ionicons name="checkmark" size={15} color="#e8def7" />
+                )}
+              </View>
             </TouchableOpacity>
           </View>
         )}
       />
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Was willst du einkaufen?"
+          placeholderTextColor="#aaa"
+          value={itemName}
+          onChangeText={(text) => setItemName(text)}
+        />
+        <TextInput
+          style={styles.quantityInput}
+          placeholder="Menge"
+          placeholderTextColor="#aaa"
+          value={itemQuantity}
+          onChangeText={(text) => setItemQuantity(text)}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
+          <Ionicons name="checkmark" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -87,28 +135,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
+    marginRight: "48%",
     marginLeft: 15,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    padding: 10,
-    margin: 20,
-    borderRadius: 30,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "#4d4a48",
-    color: "#fff",
-    paddingHorizontal: 15,
-    borderRadius: 30,
-    fontSize: 18,
-    marginRight: 10,
-  },
-  addButton: {
-    backgroundColor: "#6f6d62",
-    padding: 15,
-    borderRadius: 30,
   },
   list: {
     flex: 1,
@@ -119,13 +147,61 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#4d4a48",
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 50,
     marginBottom: 10,
+    marginTop: 10,
+    height: 50,
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  itemDetails: {
+    flex: 1,
   },
   itemText: {
-    flex: 1,
     color: "#fff",
     fontSize: 18,
+  },
+  itemQuantity: {
+    color: "#aaa",
+    fontSize: 14,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    margin: 10,
+    borderRadius: 30,
+    backgroundColor: "#252421",
+  },
+  input: {
+    flex: 1,
+    color: "#fff",
+    paddingHorizontal: 15,
+    fontSize: 18,
+    marginEnd: 20,
+  },
+  quantityInput: {
+    width: "20%",
+    color: "#fff",
+    fontSize: 18,
+  },
+  addButton: {
+    backgroundColor: "#6f6d62",
+    padding: 15,
+    borderRadius: 30,
+  },
+  circle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
