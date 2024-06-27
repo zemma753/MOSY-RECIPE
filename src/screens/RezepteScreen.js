@@ -1,28 +1,24 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   Image,
   ScrollView,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
-  widthPercentageToDP,
-  heightPercentageToDP,
-} from "react-native-responsive-screen";
-import {
   findRecipesByCategory,
   getRecipeDetailsById,
   findRecipesByName,
 } from "../data/API";
+import { useFavorites } from "../components/FavoritesContext";
 
 const RezepteScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
-  const [searchInput, setSearchInput] = useState("");
+  const { favorites, setFavorites } = useFavorites(); // Verwenden Sie den useFavorites-Hook
 
   const handleCategoryPress = async (category) => {
     setSelectedCategory(category);
@@ -43,22 +39,11 @@ const RezepteScreen = ({ navigation }) => {
     }
   };
 
-  const handleSearch = useCallback(async (input) => {
-    if (input.length > 0) {
-      try {
-        const recipes = await findRecipesByName(input);
-        setSelectedRecipes(recipes);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-      }
-    } else {
-      setSelectedRecipes([]);
+  const handleFavoritePress = (recipe) => {
+    if (!favorites.some((fav) => fav.id === recipe.id)) {
+      setFavorites([...favorites, recipe]);
     }
-  }, []);
-
-  useEffect(() => {
-    handleSearch(searchInput);
-  }, [searchInput]);
+  };
 
   const categories = [
     {
@@ -82,19 +67,6 @@ const RezepteScreen = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.headerText}>Recipes</Text>
       </View>
-      <View style={styles.searchInput}>
-        <Ionicons name="search-sharp" size={25} color="#6f6d62" />
-        <TextInput
-          placeholder="Nach Zutaten suchen"
-          placeholderTextColor="#6f6d62"
-          style={styles.searchText}
-          value={searchInput}
-          onChangeText={(text) => setSearchInput(text)}
-        />
-        <TouchableOpacity onPress={() => setSearchInput("")}>
-          <Ionicons name="close" size={25} color="#6f6d62" />
-        </TouchableOpacity>
-      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -116,20 +88,25 @@ const RezepteScreen = ({ navigation }) => {
       </ScrollView>
       <ScrollView style={styles.content}>
         <View style={styles.itemsContainerbelow}>
-          {selectedRecipes &&
-            selectedRecipes.map((recipe, index) => (
+          {selectedRecipes.map((recipe, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.recipeItem}
+              onPress={() => handleRecipePress(recipe.id)}
+            >
+              <Image
+                source={{ uri: recipe.image }}
+                style={styles.recipeImage}
+              />
+              <Text style={styles.recipeName}>{recipe.title}</Text>
               <TouchableOpacity
-                key={index}
-                style={styles.recipeItem}
-                onPress={() => handleRecipePress(recipe.id)}
+                style={styles.favoriteButton}
+                onPress={() => handleFavoritePress(recipe)}
               >
-                <Image
-                  source={{ uri: recipe.image }}
-                  style={styles.recipeImage}
-                />
-                <Text style={styles.recipeName}>{recipe.title}</Text>
+                <Ionicons name="star" size={25} color="white" />
               </TouchableOpacity>
-            ))}
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -150,7 +127,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    height: heightPercentageToDP(10),
+    height: 50,
     paddingTop: 15,
     paddingStart: 10,
   },
@@ -160,38 +137,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: 15,
   },
-  searchInput: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    padding: 10,
-    margin: 20,
-    backgroundColor: "#252421",
-    borderRadius: 30,
-  },
-  searchText: {
-    marginLeft: 15,
-    fontSize: 18,
-    color: "white",
-    flex: 1,
-  },
   categoriesContainer: {
-    maxHeight: 70,
-    paddingHorizontal: 10,
-    marginBottom: 30,
-    marginTop: 15,
+    marginVertical: 10,
   },
   categoryItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#252421",
-    borderRadius: 30,
+    borderRadius: 50,
     marginHorizontal: 5,
-    padding: 10,
-    height: 60,
   },
   selectedCategory: {
-    borderWidth: 2,
-    borderColor: "#e8def7",
+    backgroundColor: "#6f6d62",
   },
   categoryImage: {
     width: 40,
@@ -216,16 +173,17 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     width: "48.5%",
-    height: 270,
+    height: 290,
     backgroundColor: "#252421",
     borderRadius: 10,
     marginBottom: 20,
+    position: "relative",
   },
   recipeName: {
     fontSize: 16,
     color: "#fff",
     paddingStart: 10,
-    flexWrap: "wrap", // ensures the text wraps to the next line
+    flexWrap: "wrap",
   },
   recipeImage: {
     width: "100%",
@@ -234,14 +192,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
-  recipeTime: {
-    paddingStart: 10,
-    paddingTop: 20,
-    color: "#6f6d62",
-  },
-  recipetimeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
+  favoriteButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#6f6d62",
+    borderRadius: 15,
+    padding: 5,
   },
 });

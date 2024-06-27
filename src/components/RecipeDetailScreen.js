@@ -118,6 +118,7 @@ const RecipeDetailScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <Image source={{ uri: recipeDetails.image }} style={styles.recipeImage} />
+      <Text style={styles.recipeName}>{recipe.title}</Text>
       <Text style={styles.nutritionTitle}>Nutrition Per Serving</Text>
       <View style={styles.nutritionContainer}>
         <View style={styles.nutritionItem}>
@@ -258,5 +259,11 @@ const styles = StyleSheet.create({
   tabContent: {
     flexGrow: 1,
     alignItems: "center",
+  },
+  recipeName: {
+    fontSize: 25,
+    color: "white",
+    alignSelf: "flex-start",
+    margin: 10,
   },
 });

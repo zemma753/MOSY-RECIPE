@@ -1,67 +1,46 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  FlatList,
-  Image,
-} from "react-native";
+import React from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
+  widthPercentageToDP,
+  heightPercentageToDP,
 } from "react-native-responsive-screen";
+import { ScrollView } from "react-native-gesture-handler";
+import { useFavorites } from "../components/FavoritesContext";
 
-const initialFavorites = [
-  { id: '1', name: 'Omlett', image: require('../../assets/omlett.jpg') },
-  { id: '2', name: 'Kartoffelauflauf', image: require('../../assets/kartoffelauflauf.jpg') },
-  { id: '3', name: 'Lasagne', image: require('../../assets/lasagne.jpg') },
-  { id: '4', name: 'Nudelsalat', image: require('../../assets/Nudelsalat.jpg') },
-  { id: '5', name: 'Bulgur Reis', image: require('../../assets/bulgur.jpg') },
-  // Weitere Platzhalter für Rezepte
-];
-
-export default function FavoriteScreen({ navigation }) {
-  const [favorites, setFavorites] = useState(initialFavorites);
-
-  const handleRecipePress = (item) => {
-    // Hier die Navigation oder eine andere Aktion hinzufügen
-  };
-
-  const toggleFavorite = (item) => {
-    setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== item.id));
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => toggleFavorite(item)}>
-        <Ionicons name="star" size={25} color="black" style={styles.icon} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleRecipePress(item)} style={styles.itemContent}>
-        <Image source={item.image} style={styles.itemImage} />
-        <Text style={styles.itemText}>{item.name}</Text>
-      </TouchableOpacity>
-    </View>
-  );
+const FavoriteScreen = ({ navigation }) => {
+  const { favorites } = useFavorites(); // Verwenden Sie den useFavorites-Hook
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Favoriten</Text>
+        <Text style={styles.headerText}>Favorites</Text>
       </View>
-      <FlatList
-        data={favorites}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContainer}
-      />
+      <ScrollView style={styles.content}>
+        <View style={styles.itemsContainerbelow}>
+          {favorites.map((recipe, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.recipeItem}
+              onPress={() => navigation.navigate("RecipeDetail", { recipe })}
+            >
+              <Image
+                source={{ uri: recipe.image }}
+                style={styles.recipeImage}
+              />
+              <Text style={styles.recipeName}>{recipe.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
-}
+};
+
+export default FavoriteScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -75,7 +54,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    height: hp(10),
+    height: heightPercentageToDP(10),
     paddingTop: 15,
     paddingStart: 10,
   },
@@ -85,33 +64,34 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: 15,
   },
-  listContainer: {
-    padding: 20,
+  content: {
+    flex: 1,
   },
-  itemContainer: {
+  itemsContainerbelow: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#4d4a48",
-    padding: 15,
-    borderRadius: 10,
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
-  icon: {
-    paddingHorizontal: 10,
+  recipeItem: {
+    width: "48.5%",
+    height: 290,
+    backgroundColor: "#252421",
+    borderRadius: 10,
+    marginBottom: 20,
   },
-  itemContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  itemImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginLeft: 10,
-  },
-  itemText: {
-    fontSize: 18,
+  recipeName: {
+    fontSize: 16,
     color: "#fff",
-    marginLeft: 10, // Abstand zwischen Bild und Text
+    paddingStart: 10,
+    flexWrap: "wrap",
+  },
+  recipeImage: {
+    width: "100%",
+    height: "65%",
+    resizeMode: "cover",
+    borderRadius: 10,
+    marginBottom: 5,
   },
 });

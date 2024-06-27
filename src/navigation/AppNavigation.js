@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "../screens/HomeScreen";
@@ -11,6 +11,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import RezepteScreen from "../screens/RezepteScreen";
 import ShoppingListScreen from "../screens/ShoppingListScreen";
 import { MaterialIcons } from "@expo/vector-icons";
+import { FavoritesProvider } from "../components/FavoritesContext";
 
 const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -66,31 +67,47 @@ function MainTabs() {
 }
 
 const AppNavigation = () => {
+  const [favorites, setFavorites] = useState([]);
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Start"
-          component={StartScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Main"
-          component={MainTabs}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="RecipeDetail"
-          component={RecipeDetailScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ShoppingList"
-          component={ShoppingListScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <FavoritesProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Start"
+            component={StartScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Main"
+            component={MainTabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="RecipeDetail"
+            component={RecipeDetailScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ShoppingList"
+            component={ShoppingListScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="Rezepte">
+            {(props) => (
+              <RezepteScreen
+                {...props}
+                favorites={favorites}
+                setFavorites={setFavorites}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Favorite">
+            {(props) => <FavoriteScreen {...props} favorites={favorites} />}
+          </Stack.Screen>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </FavoritesProvider>
   );
 };
 
