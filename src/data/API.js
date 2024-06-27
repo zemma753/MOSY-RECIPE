@@ -35,12 +35,12 @@ export const findRecipesByIngredient = async (ingredients) => {
   }
 };
 
-// Abrufen von Rezeptdetails anhand der ID
 export const getRecipeDetailsById = async (id) => {
   try {
     const response = await api.get(`/${id}/information`, {
       params: {
         apiKey: SPOONACULAR_API_KEY,
+        includeNutrition: true,
       },
     });
     return response.data;

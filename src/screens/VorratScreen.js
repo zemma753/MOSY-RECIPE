@@ -1,40 +1,55 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
   TextInput,
-  TouchableOpacity,
-  Image,
+  StyleSheet,
   ScrollView,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Feather } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
 import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
-import {
-  findRecipesByCategory,
-  getRecipeDetailsById,
-  findRecipesByName,
-} from "../data/API";
+import { Feather } from "@expo/vector-icons";
+import { findRecipesByIngredient, getRecipeDetailsById } from "../data/API";
+import debounce from "lodash.debounce";
 
-const RezepteScreen = ({ navigation }) => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
+const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
+  const [cache, setCache] = useState({});
 
-  const handleCategoryPress = async (category) => {
-    setSelectedCategory(category);
-    try {
-      const recipes = await findRecipesByCategory(category);
-      setSelectedRecipes(recipes);
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
-    }
-  };
+  const handleSearch = useCallback(
+    debounce(async (input) => {
+      if (input.length > 0) {
+        const cacheKey = input.trim();
+        if (cache[cacheKey]) {
+          setSelectedRecipes(cache[cacheKey]);
+        } else {
+          try {
+            const ingredients = input
+              .split(",")
+              .map((ingredient) => ingredient.trim());
+            const recipes = await findRecipesByIngredient(ingredients);
+            setCache((prevCache) => ({ ...prevCache, [cacheKey]: recipes }));
+            setSelectedRecipes(recipes);
+          } catch (error) {
+            console.error("Error fetching recipes:", error);
+          }
+        }
+      } else {
+        setSelectedRecipes([]);
+      }
+    }, 1000), // Increased debounce delay to 1000ms
+    [cache]
+  );
+
+  useEffect(() => {
+    handleSearch(searchInput);
+  }, [searchInput, handleSearch]);
 
   const handleRecipePress = async (id) => {
     try {
@@ -45,51 +60,25 @@ const RezepteScreen = ({ navigation }) => {
     }
   };
 
-  const handleSearch = useCallback(async (input) => {
-    if (input.length > 0) {
-      try {
-        const recipes = await findRecipesByName(input);
-        setSelectedRecipes(recipes);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-      }
-    } else {
-      setSelectedRecipes([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    handleSearch(searchInput);
-  }, [searchInput]);
-
-  const categories = [
-    {
-      name: "main course",
-      image: require("../../assets/ingredients/eier.png"),
-    },
-    { name: "dessert", image: require("../../assets/ingredients/paprika.png") },
-    { name: "salad", image: require("../../assets/ingredients/zwiebel.png") },
-    { name: "snack", image: require("../../assets/ingredients/sellerie.png") },
-    {
-      name: "breakfast",
-      image: require("../../assets/ingredients/carrots.png"),
-    },
-  ];
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Recipes</Text>
+        <Text style={styles.headerText}>Saving leftovers</Text>
       </View>
       <View style={styles.searchInput}>
         <Ionicons name="search-sharp" size={25} color="#6f6d62" />
         <TextInput
           placeholder="Nach Zutaten suchen"
           placeholderTextColor="#6f6d62"
-          style={styles.searchText}
+          style={{
+            marginLeft: 15,
+            fontSize: 18,
+            color: "white",
+            flex: 1,
+          }}
           value={searchInput}
           onChangeText={(text) => setSearchInput(text)}
         />
@@ -97,65 +86,44 @@ const RezepteScreen = ({ navigation }) => {
           <Ionicons name="close" size={25} color="#6f6d62" />
         </TouchableOpacity>
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesContainer}
-      >
-        {categories.map((category, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.categoryItem,
-              selectedCategory === category.name && styles.selectedCategory,
-            ]}
-            onPress={() => handleCategoryPress(category.name)}
-          >
-            <Image source={category.image} style={styles.categoryImage} />
-            <Text style={styles.categoryText}>{category.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+
       <ScrollView style={styles.content}>
         <View style={styles.itemsContainerbelow}>
-          {selectedRecipes &&
-            selectedRecipes.map((recipe, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.recipeItem}
-                onPress={() => handleRecipePress(recipe.id)}
-              >
-                <Image
-                  source={{ uri: recipe.image }}
-                  style={styles.recipeImage}
-                />
-                <TouchableOpacity style={styles.favoriteIcon}>
-                  <AntDesign name="star" size={25} color="#E5C100" />
-                </TouchableOpacity>
-                <Text style={styles.recipeName}>{recipe.title}</Text>
-
+          {selectedRecipes.map((recipeData, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.recipeItem}
+              onPress={() => handleRecipePress(recipeData.id)}
+            >
+              <Image
+                source={{ uri: recipeData.image }}
+                style={styles.recipeImage}
+              />
+              <View style={styles.recipeDetails}>
+                <Text style={styles.recipeName}>{recipeData.title}</Text>
                 <View style={styles.recipetimeContainer}>
                   <Feather
                     name="clock"
-                    size={24}
+                    size={18}
                     color="#6f6d62"
                     style={styles.recipeTimeIcon}
                   />
                   <Text style={styles.recipeTime}>
-                    {recipe.readyInMinutes
-                      ? `${recipe.readyInMinutes} Min`
-                      : "N/A"}
+                    {recipeData.readyInMinutes
+                      ? `${recipeData.readyInMinutes} Min`
+                      : "-"}
                   </Text>
                 </View>
-              </TouchableOpacity>
-            ))}
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </View>
   );
 };
 
-export default RezepteScreen;
+export default VorratScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -187,44 +155,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#252421",
     borderRadius: 30,
   },
-  searchText: {
-    marginLeft: 15,
-    fontSize: 18,
-    color: "white",
-    flex: 1,
-  },
-  categoriesContainer: {
-    maxHeight: 70,
-    paddingHorizontal: 10,
-    marginBottom: 30,
-    marginTop: 15,
-  },
-  categoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#252421",
-    borderRadius: 30,
-    marginHorizontal: 5,
-    padding: 10,
-    height: 60,
-  },
-  selectedCategory: {
-    borderWidth: 2,
-    borderColor: "#e8def7",
-  },
-  categoryImage: {
-    width: 40,
-    height: 40,
-    resizeMode: "cover",
-    borderRadius: 20,
-  },
-  categoryText: {
-    fontSize: 14,
-    color: "#fff",
-    marginLeft: 10,
-  },
   content: {
     flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    padding: 10,
+    marginTop: 10,
   },
   itemsContainerbelow: {
     flexDirection: "row",
@@ -239,7 +178,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#252421",
     borderRadius: 10,
     marginBottom: 20,
-    justifyContent: "space-between",
   },
   recipeName: {
     fontSize: 16,
@@ -257,18 +195,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingLeft: 10,
-    paddingBottom: 10,
+    paddingLeft: 10, // Adjust padding to ensure alignment
+    paddingBottom: 10, // Adjust padding to ensure alignment
   },
   recipeTimeIcon: {
-    paddingRight: 5,
+    paddingRight: 5, // Adjust padding to ensure alignment
   },
   recipeTime: {
     color: "#6f6d62",
   },
-  favoriteIcon: {
-    position: "absolute",
-    top: 10,
-    right: 10,
+  recipeDetails: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
 });

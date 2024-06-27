@@ -13,6 +13,11 @@ import {
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import { getRecipeDetailsById } from "../data/API";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { IngredientsTab, InstructionsTab } from "./RecipeTabs";
+
+const Tab = createMaterialTopTabNavigator();
 
 const RecipeDetailScreen = ({ navigation, route }) => {
   const { recipe } = route.params;
@@ -97,81 +102,87 @@ const RecipeDetailScreen = ({ navigation, route }) => {
     });
   };
 
-  const incrementServings = () => {
-    setServings((prevServings) => prevServings + 1);
-  };
-
-  const decrementServings = () => {
-    setServings((prevServings) => (prevServings > 1 ? prevServings - 1 : 1));
-  };
-
   if (!recipeDetails) {
     return (
       <View style={styles.container}>
-        <Text style={styles.loadingText}>Laden...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
-  const instructionsText = recipeDetails.analyzedInstructions.length
-    ? recipeDetails.analyzedInstructions[0].steps.map((instruction, index) => {
-        const key = `instruction_${index}`;
-        return (
-          <View key={key} style={styles.instructionItem}>
-            <View style={styles.circle}>
-              <Text style={styles.circleText}>{index + 1}</Text>
-            </View>
-            <View style={styles.instructionBox}>
-              <Text style={styles.instructionText}>{instruction.step}</Text>
-            </View>
-          </View>
-        );
-      })
-    : null;
-
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Image
-          source={{ uri: recipeDetails.image }}
-          style={styles.recipeImage}
-        />
-
-        <View style={styles.servingsContainer}>
-          <View style={styles.servingsControl}>
-            <TouchableOpacity
-              onPress={decrementServings}
-              style={styles.servingsButton}
-            >
-              <Ionicons name="remove-circle" size={50} color="#6f6d62" />
-            </TouchableOpacity>
-            <Text style={styles.servingsText}>{servings}</Text>
-            <TouchableOpacity
-              onPress={incrementServings}
-              style={styles.servingsButton}
-            >
-              <Ionicons name="add-circle" size={50} color="#6f6d62" />
-            </TouchableOpacity>
-          </View>
+      <Image source={{ uri: recipeDetails.image }} style={styles.recipeImage} />
+      <Text style={styles.nutritionTitle}>Nutrition Per Serving</Text>
+      <View style={styles.nutritionContainer}>
+        <View style={styles.nutritionItem}>
+          <Text style={styles.nutritionText}>Calories</Text>
+          <Text style={styles.nutritionValue}>
+            {recipeDetails.nutrition.nutrients.find(
+              (n) => n.name === "Calories"
+            )?.amount || "N/A"}{" "}
+            kcal
+          </Text>
         </View>
-        <View style={styles.ingredientsList}>
-          {scaleIngredients(recipeDetails.extendedIngredients, servings).map(
-            (ingredient, index) => (
-              <Text key={index} style={styles.ingredientItem}>
-                {ingredient}
-              </Text>
-            )
-          )}
+        <View style={styles.nutritionItem}>
+          <Text style={styles.nutritionText}>Protein</Text>
+          <Text style={styles.nutritionValue}>
+            {recipeDetails.nutrition.nutrients.find((n) => n.name === "Protein")
+              ?.amount || "N/A"}{" "}
+            g
+          </Text>
         </View>
-        <Text style={styles.sectionTitle}>Anleitung</Text>
-        {instructionsText}
-      </ScrollView>
-    </View>
+        <View style={styles.nutritionItem}>
+          <Text style={styles.nutritionText}>Fat</Text>
+          <Text style={styles.nutritionValue}>
+            {recipeDetails.nutrition.nutrients.find((n) => n.name === "Fat")
+              ?.amount || "N/A"}{" "}
+            g
+          </Text>
+        </View>
+        <View style={styles.nutritionItem}>
+          <Text style={styles.nutritionText}>Carbs</Text>
+          <Text style={styles.nutritionValue}>
+            {recipeDetails.nutrition.nutrients.find(
+              (n) => n.name === "Carbohydrates"
+            )?.amount || "N/A"}{" "}
+            g
+          </Text>
+        </View>
+      </View>
+      <NavigationContainer independent={true}>
+        <Tab.Navigator
+          screenOptions={{
+            tabBarStyle: {
+              backgroundColor: "#353430",
+            },
+            tabBarActiveTintColor: "#ffffff",
+            tabBarInactiveTintColor: "#6f6d62",
+            tabBarIndicatorStyle: {
+              backgroundColor: "#e8def7",
+            },
+          }}
+        >
+          <Tab.Screen name="Ingredients">
+            {() => (
+              <IngredientsTab
+                recipeDetails={recipeDetails}
+                servings={servings}
+                scaleIngredients={scaleIngredients}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Instructions">
+            {() => <InstructionsTab recipeDetails={recipeDetails} />}
+          </Tab.Screen>
+        </Tab.Navigator>
+      </NavigationContainer>
+    </ScrollView>
   );
 };
 
@@ -201,7 +212,6 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: "center",
-    padding: 20,
   },
   recipeImage: {
     width: widthPercentageToDP(100),
@@ -209,37 +219,9 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     borderRadius: 10,
     marginBottom: 20,
-    position: "absolute",
-    opacity: 0.2,
+    opacity: 0.6,
   },
 
-  servingsContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  servingsControl: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  servingsButton: {
-    marginHorizontal: 10,
-    paddingRight: 20,
-    paddingLeft: 20,
-  },
-  servingsText: {
-    fontSize: 50,
-    color: "#fff",
-  },
-
-  ingredientsList: {
-    alignSelf: "flex-start",
-    marginBottom: 20,
-  },
-  ingredientItem: {
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 5,
-  },
   sectionTitle: {
     fontSize: 22,
     fontWeight: "bold",
@@ -247,39 +229,34 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: "flex-start",
   },
-  instructionText: {
-    fontSize: 16,
-    color: "#fff",
-    textAlign: "left",
-  },
-  instructionItem: {
-    alignItems: "center",
+
+  nutritionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
     marginBottom: 20,
   },
-  circle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#252421",
-    justifyContent: "center",
+  nutritionItem: {
     alignItems: "center",
-    marginRight: 10,
   },
-  circleText: {
-    fontSize: 25,
+  nutritionText: {
+    fontSize: 19,
+    color: "#6f6d62",
+  },
+  nutritionValue: {
+    fontSize: 16,
     color: "#fff",
     fontWeight: "bold",
+    marginBottom: 15,
   },
-  instructionBox: {
-    backgroundColor: "#212121",
-    borderRadius: 10,
-    padding: 10,
-    width: widthPercentageToDP(100),
-    height: 100,
+  nutritionTitle: {
+    fontSize: 20,
+    color: "#fff",
     alignSelf: "flex-start",
-    justifyContent: "center",
-    transform: [{ translateY: -30 }],
-    opacity: 0.5,
-    paddingHorizontal: 20,
+    margin: 20,
+  },
+  tabContent: {
+    flexGrow: 1,
+    alignItems: "center",
   },
 });
