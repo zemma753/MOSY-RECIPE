@@ -19,6 +19,13 @@ const ShoppingListScreen = ({ navigation }) => {
   const [itemName, setItemName] = useState("");
   const [itemQuantity, setItemQuantity] = useState("");
 
+  const getIngredientImageUrl = (ingredient, plural = false) => {
+    const formattedIngredient = (plural ? ingredient + "s" : ingredient)
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+    return `https://spoonacular.com/cdn/ingredients_100x100/${formattedIngredient}.jpg`;
+  };
+
   const handleAddItem = () => {
     if (itemName.trim() !== "" && itemQuantity.trim() !== "") {
       setItems([
@@ -72,9 +79,15 @@ const ShoppingListScreen = ({ navigation }) => {
           <View style={styles.item}>
             <Image
               source={{
-                uri: `https://spoonacular.com/cdn/ingredients_100x100/${item.name}.jpg`,
+                uri: getIngredientImageUrl(item.name),
               }}
               style={styles.itemImage}
+              onError={({ nativeEvent: { error } }) => {
+                //  console.warn(`Image for ${item.name} not found, trying plural`);
+                item.imageFailed = true;
+                item.imageUri = getIngredientImageUrl(item.name, true);
+                setItems([...items]);
+              }}
             />
             <View style={styles.itemDetails}>
               <Text style={styles.itemText}>{item.name}</Text>
@@ -146,16 +159,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#4d4a48",
-    padding: 15,
+    padding: 5,
     borderRadius: 50,
     marginBottom: 10,
     marginTop: 10,
     height: 50,
   },
   itemImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 15,
   },
   itemDetails: {
@@ -202,6 +215,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
     justifyContent: "center",
     alignItems: "center",
+    marginEnd: 10,
   },
 });
 

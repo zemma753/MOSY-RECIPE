@@ -141,6 +141,7 @@ const RecipeDetailScreen = ({ navigation, route }) => {
           source={{ uri: recipeDetails.image }}
           style={styles.recipeImage}
         />
+
         <View style={styles.servingsContainer}>
           <View style={styles.servingsControl}>
             <TouchableOpacity
@@ -158,7 +159,6 @@ const RecipeDetailScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
         </View>
-
         <View style={styles.ingredientsList}>
           {scaleIngredients(recipeDetails.extendedIngredients, servings).map(
             (ingredient, index) => (
@@ -168,7 +168,6 @@ const RecipeDetailScreen = ({ navigation, route }) => {
             )
           )}
         </View>
-
         <Text style={styles.sectionTitle}>Anleitung</Text>
         {instructionsText}
       </ScrollView>
@@ -205,11 +204,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   recipeImage: {
-    width: widthPercentageToDP(90),
-    height: heightPercentageToDP(30),
+    width: widthPercentageToDP(100),
+    height: heightPercentageToDP(60),
     resizeMode: "cover",
     borderRadius: 10,
     marginBottom: 20,
+    position: "absolute",
+    opacity: 0.2,
   },
 
   servingsContainer: {

@@ -89,7 +89,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerText}>Saving leftovers</Text>
         <TouchableOpacity onPress={() => navigation.navigate("ShoppingList")}>
-          <Ionicons name="cart" size={30} color="white" />
+          <Ionicons name="cart" size={30} color="#988e73" />
         </TouchableOpacity>
       </View>
       <ScrollView>

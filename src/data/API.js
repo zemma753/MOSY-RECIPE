@@ -66,6 +66,23 @@ export const findRecipesByName = async (query) => {
   }
 };
 
+// Suche nach Rezepten anhand von Kategorien
+export const findRecipesByCategory = async (category) => {
+  try {
+    const response = await api.get(`/complexSearch`, {
+      params: {
+        apiKey: SPOONACULAR_API_KEY,
+        type: category,
+        number: 10,
+      },
+    });
+    return response.data.results;
+  } catch (error) {
+    console.error("Error fetching recipes by category:", error);
+    throw error;
+  }
+};
+
 export const getRandomRecipes = async () => {
   try {
     const response = await api.get("/random", {
