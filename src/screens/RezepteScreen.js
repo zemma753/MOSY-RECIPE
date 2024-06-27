@@ -7,7 +7,12 @@ import {
   Image,
   ScrollView,
 } from "react-native";
+import {
+  widthPercentageToDP,
+  heightPercentageToDP,
+} from "react-native-responsive-screen";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import {
   findRecipesByCategory,
   getRecipeDetailsById,
@@ -18,7 +23,9 @@ import { useFavorites } from "../components/FavoritesContext";
 const RezepteScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
-  const { favorites, setFavorites } = useFavorites(); // Verwenden Sie den useFavorites-Hook
+  const { favorites, setFavorites } = useFavorites();
+
+  const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
 
   const handleCategoryPress = async (category) => {
     setSelectedCategory(category);
@@ -100,10 +107,14 @@ const RezepteScreen = ({ navigation }) => {
               />
               <Text style={styles.recipeName}>{recipe.title}</Text>
               <TouchableOpacity
-                style={styles.favoriteButton}
+                style={styles.favoriteIcon}
                 onPress={() => handleFavoritePress(recipe)}
               >
-                <Ionicons name="star" size={25} color="white" />
+                <AntDesign
+                  name={isFavorite(recipe) ? "star" : "staro"}
+                  size={25}
+                  color="#E5C100"
+                />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
@@ -127,7 +138,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    height: 50,
+    height: heightPercentageToDP(10),
     paddingTop: 15,
     paddingStart: 10,
   },
@@ -137,18 +148,38 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginLeft: 15,
   },
+  searchInput: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    padding: 10,
+    margin: 20,
+    backgroundColor: "#252421",
+    borderRadius: 30,
+  },
+  searchText: {
+    marginLeft: 15,
+    fontSize: 18,
+    color: "white",
+    flex: 1,
+  },
   categoriesContainer: {
-    marginVertical: 10,
+    maxHeight: 70,
+    paddingHorizontal: 10,
+    marginBottom: 30,
+    marginTop: 15,
   },
   categoryItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#252421",
-    borderRadius: 50,
+    borderRadius: 30,
     marginHorizontal: 5,
+    padding: 10,
+    height: 60,
   },
   selectedCategory: {
-    backgroundColor: "#6f6d62",
+    borderWidth: 2,
+    borderColor: "#e8def7",
   },
   categoryImage: {
     width: 40,
@@ -173,11 +204,10 @@ const styles = StyleSheet.create({
   },
   recipeItem: {
     width: "48.5%",
-    height: 290,
+    height: 270,
     backgroundColor: "#252421",
     borderRadius: 10,
     marginBottom: 20,
-    position: "relative",
   },
   recipeName: {
     fontSize: 16,
@@ -192,12 +222,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
-  favoriteButton: {
+  starIcon: {
     position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: "#6f6d62",
-    borderRadius: 15,
-    padding: 5,
+  },
+  recipeTime: {
+    paddingStart: 10,
+    paddingTop: 20,
+    color: "#6f6d62",
+  },
+  recipetimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  favoriteIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });

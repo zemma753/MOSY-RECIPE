@@ -1,3 +1,5 @@
+// RecipeTabs.js
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -91,6 +93,7 @@ const styles2 = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
 export const InstructionsTab = ({ recipeDetails }) => (
   <View style={styles3.tabContent}>
     {recipeDetails.analyzedInstructions.length
@@ -101,7 +104,9 @@ export const InstructionsTab = ({ recipeDetails }) => (
                 <Text style={styles3.circleText}>{index + 1}</Text>
               </View>
               <View style={styles3.instructionBox}>
-                <Text style={styles3.instructionText}>{instruction.step}</Text>
+                <Text style={styles3.instructionText}>
+                  {index + 1}. {instruction.step}
+                </Text>
               </View>
             </View>
           )
@@ -109,6 +114,7 @@ export const InstructionsTab = ({ recipeDetails }) => (
       : null}
   </View>
 );
+
 const styles3 = StyleSheet.create({
   tabContent: {
     flex: 1,
@@ -121,7 +127,6 @@ const styles3 = StyleSheet.create({
   },
   instructionItem: {
     alignItems: "center",
-    marginBottom: 10,
     marginTop: 20,
   },
   circle: {
@@ -132,6 +137,7 @@ const styles3 = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
+    marginBottom: 10,
   },
   circleText: {
     fontSize: 25,

@@ -16,6 +16,8 @@ import { getRecipeDetailsById } from "../data/API";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { IngredientsTab, InstructionsTab } from "./RecipeTabs";
+import { AntDesign } from "@expo/vector-icons";
+import { useFavorites } from "../components/FavoritesContext";
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -23,6 +25,9 @@ const RecipeDetailScreen = ({ navigation, route }) => {
   const { recipe } = route.params;
   const [recipeDetails, setRecipeDetails] = useState(null);
   const [servings, setServings] = useState(1);
+  const { favorites, setFavorites } = useFavorites();
+
+  const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
 
   useEffect(() => {
     const fetchRecipeDetails = async () => {
@@ -110,6 +115,12 @@ const RecipeDetailScreen = ({ navigation, route }) => {
     );
   }
 
+  const handleFavoritePress = (recipe) => {
+    if (!favorites.some((fav) => fav.id === recipe.id)) {
+      setFavorites([...favorites, recipe]);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -118,7 +129,19 @@ const RecipeDetailScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
       <Image source={{ uri: recipeDetails.image }} style={styles.recipeImage} />
-      <Text style={styles.recipeName}>{recipe.title}</Text>
+      <View style={styles.recipeTitleContainer}>
+        <Text style={styles.recipeName}>{recipe.title}</Text>
+        <TouchableOpacity
+          style={styles.favoriteIcon}
+          onPress={() => handleFavoritePress(recipe)}
+        >
+          <AntDesign
+            name={isFavorite(recipe) ? "star" : "staro"}
+            size={25}
+            color="#E5C100"
+          />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.nutritionTitle}>Nutrition Per Serving</Text>
       <View style={styles.nutritionContainer}>
         <View style={styles.nutritionItem}>
@@ -263,7 +286,14 @@ const styles = StyleSheet.create({
   recipeName: {
     fontSize: 25,
     color: "white",
-    alignSelf: "flex-start",
+    flex: 1,
+    marginRight: 10,
+  },
+  recipeTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     margin: 10,
   },
+  favoriteIcon: {},
 });

@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     paddingHorizontal: 10,
-    marginBottom: 10,
+    marginVertical: 15,
   },
   recipeItem: {
     width: "48.5%",
