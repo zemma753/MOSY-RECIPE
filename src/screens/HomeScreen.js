@@ -7,35 +7,33 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  FlatList,
   ImageBackground,
 } from "react-native";
-import {
-  widthPercentageToDP,
-  heightPercentageToDP,
-} from "react-native-responsive-screen";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { findRecipesByName } from "../data/API";
+import { widthPercentageToDP, heightPercentageToDP } from "react-native-responsive-screen";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { findRecipesByName, getRandomRecipes } from "../data/API";
 
 const tips = [
   {
     id: "1",
     image: require("../../assets/obst.jpg"),
-    text: "Tomaten nicht im Kühlschrank aufbewahren, da sie so schneller an Geschmack verlieren. Lagere sie bei Raumtemperatur.",
+    text: "Store tomatoes at room temperature instead of in the refrigerator to prevent loss of flavor.",
   },
   {
     id: "2",
     image: require("../../assets/kraeuter.jpg"),
-    text: "Kräuter in einem Glas Wasser im Kühlschrank aufbewahren, um ihre Frische zu verlängern.",
+    text: "Store herbs in a glass of water in the refrigerator to extend their freshness.",
   },
   {
     id: "3",
     image: require("../../assets/brot.jpg"),
-    text: "Mit altem Brot lassen sich köstliche Croutons oder ein Brotauflauf zaubern.",
+    text: "Use stale bread to make delicious croutons or a bread pudding.",
   },
   {
     id: "4",
     image: require("../../assets/bananen.jpg"),
-    text: "Bewahre Bananen getrennt von anderem Obst auf, da sie Ethylen abgeben und das Reifen anderer Früchte beschleunigen.",
+    text: "Store bananas separately from other fruits as they release ethylene gas, which speeds up the ripening of other fruits.",
   },
 ];
 
@@ -44,20 +42,20 @@ const HomeScreen = ({ navigation }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [randomRecipes, setRandomRecipes] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleNextTip = () => {
-    if (currentTipIndex < tips.length - 1) {
-      setCurrentTipIndex(currentTipIndex + 1);
+  const handleNextRecipe = () => {
+    if (currentIndex < randomRecipes.length - 1) {
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
-  const handlePrevTip = () => {
-    if (currentTipIndex > 0) {
-      setCurrentTipIndex(currentTipIndex - 1);
+  const handlePrevRecipe = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
     }
   };
-
-  const currentTip = tips[currentTipIndex] || {};
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
@@ -67,7 +65,7 @@ const HomeScreen = ({ navigation }) => {
     if (query.length > 0) {
       try {
         const recipes = await findRecipesByName(query);
-        setSearchResults(recipes);
+        setSearchResults(recipes.slice(0, 5));
       } catch (error) {
         console.error("Error fetching recipes:", error);
       }
@@ -80,105 +78,146 @@ const HomeScreen = ({ navigation }) => {
     handleSearch(searchQuery);
   }, [searchQuery]);
 
+  useEffect(() => {
+    const fetchRandomRecipes = async () => {
+      try {
+        const recipes = await getRandomRecipes();
+        setRandomRecipes(recipes);
+      } catch (error) {
+        console.error("Error fetching random recipes:", error);
+      }
+    };
+
+    fetchRandomRecipes();
+  }, []);
+
   const handleRecipePress = (recipe) => {
     navigation.navigate("RecipeDetail", { recipe });
   };
 
+  const navigateToRezepteScreen = () => {
+    navigation.navigate("Rezepte");
+  };
+
+  const navigateToVorratScreen = () => {
+    navigation.navigate("Vorrat");
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Saving leftovers</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("ShoppingList")}>
+        <TouchableOpacity onPress={navigateToRezepteScreen}>
           <Ionicons name="cart" size={30} color="#988e73" />
         </TouchableOpacity>
       </View>
-      <ScrollView>
-        <View style={styles.searchInput}>
-          <Ionicons name="search-sharp" size={25} color="#6f6d62" />
-          <TextInput
-            placeholder="Nach Rezepten suchen"
-            placeholderTextColor="#6f6d62"
-            style={{ marginLeft: 15, fontSize: 18, color: "white" }}
-            value={searchQuery}
-            onChangeText={(query) => setSearchQuery(query)}
-          />
-        </View>
 
-        {searchResults.length > 0 && (
-          <View style={styles.searchResultsContainer}>
-            {searchResults.map((recipe, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.recipeItem}
-                onPress={() => handleRecipePress(recipe)}
-              >
-                <Image
-                  source={{ uri: recipe.image }}
-                  style={styles.recipeImage}
-                />
-                <Text style={styles.recipeName}>{recipe.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+      <View style={styles.searchInput}>
+        <Ionicons name="search-sharp" size={25} color="#6f6d62" />
+        <TextInput
+          placeholder="Search for recipes"
+          placeholderTextColor="#6f6d62"
+          style={{ marginLeft: 15, fontSize: 18, color: "white" }}
+          value={searchQuery}
+          onChangeText={(query) => setSearchQuery(query)}
+        />
+      </View>
 
-        <View style={styles.middleContainer}>
-          <Text style={styles.recipeOfDay}> Recipe of the day: </Text>
+      {searchResults.length > 0 && (
+        <FlatList
+          horizontal
+          data={searchResults}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.recipeItem}
+              onPress={() => handleRecipePress(item)}
+            >
+              <Image source={{ uri: item.image }} style={styles.recipeImage} />
+              <Text style={styles.recipeName}>{item.title}</Text>
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.searchResultsContainer}
+        />
+      )}
+
+      <View style={styles.middleContainer}>
+        <Text style={styles.recipeOfDay}>Recipes of the day:</Text>
+        <View style={styles.recipeContainer}>
           <TouchableOpacity
-            onPress={() => navigation.navigate("RezepteScreen")}
+            style={styles.recipeImageWrapper}
+            onPress={() => handleRecipePress(randomRecipes[currentIndex])}
           >
-            <View style={styles.imageContainer}>
-              <ImageBackground
-                source={require("../../assets/lasagne.jpg")}
-                style={styles.itemImage}
-                imageStyle={{ borderRadius: 30 }}
+            <ImageBackground
+              source={{ uri: randomRecipes[currentIndex]?.image }}
+              style={styles.itemImage}
+              imageStyle={{ borderRadius: 30 }}
+            >
+              <TouchableOpacity
+                onPress={toggleFavorite}
+                style={styles.favoriteButton}
               >
-                <TouchableOpacity
-                  onPress={toggleFavorite}
-                  style={styles.favoriteButton}
-                >
-                  <Ionicons
-                    name={isFavorite ? "star" : "star-outline"}
-                    size={30}
-                    color={isFavorite ? "gold" : "white"}
-                  />
-                </TouchableOpacity>
-              </ImageBackground>
-            </View>
+                <AntDesign
+                  name={isFavorite ? "star" : "staro"}
+                  size={30}
+                  color={isFavorite ? "#E5C100" : "rgba(255, 255, 255, 0.5)"}
+                />
+              </TouchableOpacity>
+              <View style={styles.recipeTitleContainer}>
+                <Text style={styles.recipeNameOverlay}>{randomRecipes[currentIndex]?.title}</Text>
+              </View>
+            </ImageBackground>
           </TouchableOpacity>
+          <View style={styles.navigationButtons}>
+            {currentIndex > 0 && (
+              <TouchableOpacity
+                style={styles.arrowButton}
+                onPress={handlePrevRecipe}
+              >
+                <Ionicons name="chevron-back" size={30} color="rgba(255, 255, 255, 0.5)" />
+              </TouchableOpacity>
+            )}
+            {currentIndex < randomRecipes.length - 1 && (
+              <TouchableOpacity
+                style={styles.arrowButton}
+                onPress={handleNextRecipe}
+              >
+                <Ionicons name="chevron-forward" size={30} color="rgba(255, 255, 255, 0.5)" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
+      </View>
 
-        <View style={styles.tipsContainer}>
-          <Text style={styles.tipsHeader}>Tips and tricks</Text>
-          <View style={styles.tipCard}>
-            <Image source={currentTip.image} style={styles.tipImage} />
-            <Text style={styles.tipText}>{currentTip.text}</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[
-                styles.navButton,
-                currentTipIndex === 0 && styles.disabledButton,
-              ]}
-              onPress={handlePrevTip}
-              disabled={currentTipIndex === 0}
-            >
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.navButton,
-                currentTipIndex === tips.length - 1 && styles.disabledButton,
-              ]}
-              onPress={handleNextTip}
-              disabled={currentTipIndex === tips.length - 1}
-            >
-              <Ionicons name="arrow-forward" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
+      <TouchableOpacity
+        style={styles.transparentBox}
+        onPress={navigateToVorratScreen}
+      >
+        <Image
+          source={require("../../assets/kühlschrank.jpg")}
+          style={styles.icon}
+        />
+        <Text style={styles.transparentBoxText}>
+          Save leftovers: Still have ingredients from last week? Nothing goes to waste here.
+        </Text>
+      </TouchableOpacity>
+
+      <View style={styles.tipsContainer}>
+        <Text style={styles.tipsHeader}>Tips and tricks</Text>
+        <ScrollView
+          horizontal
+          contentContainerStyle={styles.tipsScrollContainer}
+          style={styles.tipsScrollView}
+        >
+          {tips.map((tip) => (
+            <View key={tip.id} style={styles.tipCard}>
+              <Image source={tip.image} style={styles.tipImage} />
+              <Text style={styles.tipText}>{tip.text}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -193,35 +232,39 @@ const styles = StyleSheet.create({
     borderBottomColor: "#424242",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     height: heightPercentageToDP(10),
     paddingTop: 15,
-    paddingStart: 10,
+    paddingHorizontal: 10,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginRight: "48%",
     marginLeft: 15,
   },
   searchInput: {
     flexDirection: "row",
     justifyContent: "flex-start",
-    padding: 10,
-    margin: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
     backgroundColor: "#4d4a48",
     borderRadius: 30,
+    marginTop: 20,
   },
   middleContainer: {
     marginTop: 20,
     alignItems: "center",
-    paddingTop: 1,
   },
-  imageContainer: {
-    overflow: "hidden",
-    borderRadius: 30,
+  recipeContainer: {
+    position: "relative",
     alignItems: "center",
+    marginHorizontal: 10,
+    marginBottom: 20,
+  },
+  recipeImageWrapper: {
+    marginBottom: 10,
   },
   itemImage: {
     width: 250,
@@ -229,6 +272,15 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "flex-end",
     alignItems: "center",
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   recipeOfDay: {
     color: "#fff",
@@ -239,11 +291,7 @@ const styles = StyleSheet.create({
   },
   tipsContainer: {
     marginTop: 20,
-    padding: 20,
-    backgroundColor: "#4d4a48",
-    borderRadius: 10,
     marginHorizontal: 20,
-    alignItems: "center",
   },
   tipsHeader: {
     fontSize: 22,
@@ -252,70 +300,108 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
+  tipsScrollContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  tipsScrollView: {
+    paddingHorizontal: 10,
+  },
   tipCard: {
-    backgroundColor: "#4d4a48",
+    backgroundColor: "# 353430",
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
-    marginVertical: 10,
-    maxWidth: 300, // Max width for the tip card
+    marginHorizontal: 10,
+    maxWidth: 300,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   tipImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     marginBottom: 10,
   },
   tipText: {
-    fontSize: 16,
     color: "#fff",
     textAlign: "center",
+    fontSize: 16,
   },
-  buttonContainer: {
+  arrowButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+  },
+  navigationButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "80%",
-    marginTop: 10,
-    padding: 10,
-  },
-  navButton: {
-    backgroundColor: "#6f6d62",
-    padding: 10,
-    borderRadius: 5,
-  },
-  disabledButton: {
-    backgroundColor: "#9c9a93",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
+    position: "absolute",
+    bottom: -40,
   },
   favoriteButton: {
     position: "absolute",
     top: 10,
     right: 10,
   },
-  searchResultsContainer: {
-    padding: 10,
+  recipeNameOverlay: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    marginTop: "auto",
   },
   recipeItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-    backgroundColor: "#252421",
-    borderRadius: 10,
-    padding: 10,
+    marginLeft: 20,
+    marginRight: 10,
+    marginBottom: 10,
   },
   recipeImage: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     borderRadius: 10,
-    marginRight: 10,
   },
   recipeName: {
-    fontSize: 16,
     color: "#fff",
+    textAlign: "center",
+    marginTop: 5,
+  },
+  searchResultsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  transparentBox: {
+    marginTop: 40,
+    marginHorizontal: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    padding: 20,
+    borderRadius: 10,
+    flexDirection: "row", // Added flexDirection to align icon and text horizontally
+    alignItems: "center", // Added alignItems to center items vertically
+  },
+  transparentBoxText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+    marginLeft: 10, // Added margin for spacing between icon and text
+    flex: 1, // Added flex to the text to ensure it takes remaining space
+  },
+  icon: {
+    width: 60, // Adjusted width and height of the icon
+    height: 60,
   },
 });
 
 export default HomeScreen;
+
