@@ -27,6 +27,8 @@ const VorratScreen = ({ navigation }) => {
   const { favorites, setFavorites } = useFavorites();
   const { addToRecentlyViewed } = useRecentlyViewed();
 
+  const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
+
   const handleSearch = useCallback(
     debounce(async (input) => {
       if (input.length > 0) {
