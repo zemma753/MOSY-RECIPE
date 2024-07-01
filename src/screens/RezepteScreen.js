@@ -103,6 +103,10 @@ const RezepteScreen = ({ navigation }) => {
     },
   ];
 
+  const navigateBack = () => {
+    navigation.navigate("ShoppingList");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -110,6 +114,9 @@ const RezepteScreen = ({ navigation }) => {
           <Ionicons name="arrow-back" color="white" size={25} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Recipes</Text>
+        <TouchableOpacity onPress={navigateBack} style={{ marginTop: 15 }}>
+          <Ionicons name="cart" size={30} color="#988e73" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.searchInput}>
@@ -208,6 +215,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginLeft: 15,
+    marginRight: 250,
   },
   searchInput: {
     flexDirection: "row",
