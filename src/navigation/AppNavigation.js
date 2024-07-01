@@ -21,7 +21,7 @@ function MainTabs() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      activeColor="white"
+      activeColor="#252421"
       inactiveColor="#988e73"
       barStyle={{ backgroundColor: "#252421" }}
     >
@@ -44,7 +44,7 @@ function MainTabs() {
         component={FavoriteScreen}
       />
       <Tab.Screen
-        name="Vorrat"
+        name="Stock"
         options={{
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="kitchen" color={color} size={24} />
@@ -53,10 +53,10 @@ function MainTabs() {
         component={VorratScreen}
       />
       <Tab.Screen
-        name="Rezepte"
+        name="Recipes"
         component={RezepteScreen}
         options={{
-          tabBarLabel: "Rezepte",
+          tabBarLabel: "Recipes",
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="restaurant-menu" color={color} size={24} />
           ),
@@ -93,7 +93,7 @@ const AppNavigation = () => {
             component={ShoppingListScreen}
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="Rezepte">
+          <Stack.Screen name="Recipes">
             {(props) => (
               <RezepteScreen
                 {...props}

@@ -107,6 +107,14 @@ const RecipeDetailScreen = ({ navigation, route }) => {
     });
   };
 
+  const handleFavoritePress = (recipe) => {
+    if (isFavorite(recipe)) {
+      setFavorites(favorites.filter((fav) => fav.id !== recipe.id));
+    } else {
+      setFavorites([...favorites, recipe]);
+    }
+  };
+
   if (!recipeDetails) {
     return (
       <View style={styles.container}>
@@ -114,12 +122,6 @@ const RecipeDetailScreen = ({ navigation, route }) => {
       </View>
     );
   }
-
-  const handleFavoritePress = (recipe) => {
-    if (!favorites.some((fav) => fav.id === recipe.id)) {
-      setFavorites([...favorites, recipe]);
-    }
-  };
 
   return (
     <ScrollView style={styles.container}>

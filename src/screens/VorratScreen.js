@@ -9,47 +9,44 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
-import { Feather } from "@expo/vector-icons";
 import { findRecipesByIngredient, getRecipeDetailsById } from "../data/API";
 import debounce from "lodash.debounce";
+import { useFavorites } from "../components/FavoritesContext";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
-  const [cache, setCache] = useState({});
+  const { favorites, setFavorites } = useFavorites();
+
+  const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
 
   const handleSearch = useCallback(
     debounce(async (input) => {
       if (input.length > 0) {
-        const cacheKey = input.trim();
-        if (cache[cacheKey]) {
-          setSelectedRecipes(cache[cacheKey]);
-        } else {
-          try {
-            const ingredients = input
-              .split(",")
-              .map((ingredient) => ingredient.trim());
-            const recipes = await findRecipesByIngredient(ingredients);
-            setCache((prevCache) => ({ ...prevCache, [cacheKey]: recipes }));
-            setSelectedRecipes(recipes);
-          } catch (error) {
-            console.error("Error fetching recipes:", error);
-          }
+        try {
+          const ingredients = input
+            .split(",")
+            .map((ingredient) => ingredient.trim());
+          const recipes = await findRecipesByIngredient(ingredients);
+          setSelectedRecipes(recipes);
+        } catch (error) {
+          console.error("Error fetching recipes:", error);
         }
       } else {
         setSelectedRecipes([]);
       }
-    }, 1000), // Increased debounce delay to 1000ms
-    [cache]
+    }, 500),
+    []
   );
 
   useEffect(() => {
     handleSearch(searchInput);
-  }, [searchInput, handleSearch]);
+  }, [searchInput]);
 
   const handleRecipePress = async (id) => {
     try {
@@ -57,6 +54,14 @@ const VorratScreen = ({ navigation }) => {
       navigation.navigate("RecipeDetail", { recipe });
     } catch (error) {
       console.error("Error fetching recipe details:", error);
+    }
+  };
+
+  const handleFavoritePress = (recipe) => {
+    if (isFavorite(recipe)) {
+      setFavorites(favorites.filter((fav) => fav.id !== recipe.id));
+    } else {
+      setFavorites([...favorites, recipe]);
     }
   };
 
@@ -89,34 +94,30 @@ const VorratScreen = ({ navigation }) => {
 
       <ScrollView style={styles.content}>
         <View style={styles.itemsContainerbelow}>
-          {selectedRecipes.map((recipeData, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.recipeItem}
-              onPress={() => handleRecipePress(recipeData.id)}
-            >
-              <Image
-                source={{ uri: recipeData.image }}
-                style={styles.recipeImage}
-              />
-              <View style={styles.recipeDetails}>
-                <Text style={styles.recipeName}>{recipeData.title}</Text>
-                <View style={styles.recipetimeContainer}>
-                  <Feather
-                    name="clock"
-                    size={18}
-                    color="#6f6d62"
-                    style={styles.recipeTimeIcon}
+          {selectedRecipes &&
+            selectedRecipes.map((recipe, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.recipeItem}
+                onPress={() => handleRecipePress(recipe.id)}
+              >
+                <Image
+                  source={{ uri: recipe.image }}
+                  style={styles.recipeImage}
+                />
+                <Text style={styles.recipeName}>{recipe.title}</Text>
+                <TouchableOpacity
+                  style={styles.favoriteIcon}
+                  onPress={() => handleFavoritePress(recipe)}
+                >
+                  <AntDesign
+                    name={isFavorite(recipe) ? "star" : "staro"}
+                    size={25}
+                    color="#E5C100"
                   />
-                  <Text style={styles.recipeTime}>
-                    {recipeData.readyInMinutes
-                      ? `${recipeData.readyInMinutes} Min`
-                      : "-"}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
         </View>
       </ScrollView>
     </View>
@@ -179,10 +180,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
   },
+  recipeTextContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   recipeName: {
     fontSize: 16,
     color: "#fff",
     paddingStart: 10,
+    flexWrap: "wrap",
+    flex: 1,
   },
   recipeImage: {
     width: "100%",
@@ -191,22 +199,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 5,
   },
-  recipetimeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    paddingLeft: 10, // Adjust padding to ensure alignment
-    paddingBottom: 10, // Adjust padding to ensure alignment
-  },
-  recipeTimeIcon: {
-    paddingRight: 5, // Adjust padding to ensure alignment
-  },
-  recipeTime: {
-    color: "#6f6d62",
-  },
-  recipeDetails: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
+  favoriteIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });

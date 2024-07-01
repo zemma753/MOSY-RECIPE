@@ -1,10 +1,7 @@
-// RecipeTabs.js
-
 import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -14,9 +11,6 @@ import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
-import { getRecipeDetailsById } from "../data/API";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 
 export const IngredientsTab = ({ recipeDetails, scaleIngredients }) => {
   const [servings, setServings] = useState(1);
@@ -30,7 +24,7 @@ export const IngredientsTab = ({ recipeDetails, scaleIngredients }) => {
   };
 
   return (
-    <View style={styles2.tabContent}>
+    <ScrollView style={styles2.tabContent}>
       <View style={styles2.servingsContainer}>
         <View style={styles2.servingsControl}>
           <TouchableOpacity
@@ -57,7 +51,7 @@ export const IngredientsTab = ({ recipeDetails, scaleIngredients }) => {
           )
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -89,13 +83,13 @@ const styles2 = StyleSheet.create({
     marginBottom: 5,
   },
   ingredientsList: {
-    marginHorizontal: 80,
+    marginHorizontal: 90,
     marginBottom: 20,
   },
 });
 
 export const InstructionsTab = ({ recipeDetails }) => (
-  <View style={styles3.tabContent}>
+  <ScrollView style={styles3.tabContent}>
     {recipeDetails.analyzedInstructions.length
       ? recipeDetails.analyzedInstructions[0].steps.map(
           (instruction, index) => (
@@ -104,15 +98,13 @@ export const InstructionsTab = ({ recipeDetails }) => (
                 <Text style={styles3.circleText}>{index + 1}</Text>
               </View>
               <View style={styles3.instructionBox}>
-                <Text style={styles3.instructionText}>
-                  {index + 1}. {instruction.step}
-                </Text>
+                <Text style={styles3.instructionText}>{instruction.step}</Text>
               </View>
             </View>
           )
         )
       : null}
-  </View>
+  </ScrollView>
 );
 
 const styles3 = StyleSheet.create({

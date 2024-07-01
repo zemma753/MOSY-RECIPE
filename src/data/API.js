@@ -8,13 +8,12 @@ const api = axios.create({
   },
 });
 
-// Suche nach Rezepten anhand von Zutaten
 export const findRecipesByIngredient = async (ingredients) => {
   try {
     const response = await api.get(`/findByIngredients`, {
       params: {
         ingredients: ingredients.join(","),
-        number: 10,
+        number: 20,
         apiKey: SPOONACULAR_API_KEY,
       },
     });
@@ -56,7 +55,7 @@ export const findRecipesByName = async (query) => {
       params: {
         apiKey: SPOONACULAR_API_KEY,
         query: query,
-        number: 10,
+        number: 30,
       },
     });
     return response.data.results;
@@ -66,14 +65,13 @@ export const findRecipesByName = async (query) => {
   }
 };
 
-// Suche nach Rezepten anhand von Kategorien
 export const findRecipesByCategory = async (category) => {
   try {
     const response = await api.get(`/complexSearch`, {
       params: {
         apiKey: SPOONACULAR_API_KEY,
         type: category,
-        number: 10,
+        number: 20,
       },
     });
     return response.data.results;
@@ -87,7 +85,7 @@ export const getRandomRecipes = async () => {
   try {
     const response = await api.get("/random", {
       params: {
-        number: 5, // Anzahl der zufälligen Rezepte
+        number: 5,
       },
     });
     return response.data.recipes;
@@ -99,4 +97,27 @@ export const getRandomRecipes = async () => {
 
 export const getIngredientImageUrl = (ingredient) => {
   return `https://spoonacular.com/cdn/ingredients_100x100/${ingredient}.jpg`;
+};
+
+export const findRecipesByFilter = async (filter) => {
+  try {
+    const response = await axios.get(
+      `https://api.spoonacular.com/recipes/complexSearch`,
+      {
+        params: {
+          apiKey: SPOONACULAR_API_KEY,
+          diet: filter.diet || undefined,
+          intolerances: filter.intolerances || undefined,
+          type: filter.type || undefined,
+          maxReadyTime: filter.maxReadyTime || undefined,
+          maxCalories: filter.maxCalories || undefined,
+          number: 20,
+        },
+      }
+    );
+    return response.data.results;
+  } catch (error) {
+    console.error("Error fetching filtered recipes:", error);
+    throw error;
+  }
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,24 +6,30 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  TextInput,
 } from "react-native";
 import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import {
   findRecipesByCategory,
   getRecipeDetailsById,
   findRecipesByName,
+  findRecipesByFilter,
 } from "../data/API";
 import { useFavorites } from "../components/FavoritesContext";
+import debounce from "lodash.debounce";
+import FilterComponent from "../components/Filter";
 
 const RezepteScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const { favorites, setFavorites } = useFavorites();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
 
   const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
 
@@ -47,8 +53,39 @@ const RezepteScreen = ({ navigation }) => {
   };
 
   const handleFavoritePress = (recipe) => {
-    if (!favorites.some((fav) => fav.id === recipe.id)) {
+    if (isFavorite(recipe)) {
+      setFavorites(favorites.filter((fav) => fav.id !== recipe.id));
+    } else {
       setFavorites([...favorites, recipe]);
+    }
+  };
+
+  const handleSearch = useCallback(
+    debounce(async (query) => {
+      if (query.length > 0) {
+        try {
+          const recipes = await findRecipesByName(query);
+          setSelectedRecipes(recipes);
+        } catch (error) {
+          console.error("Error fetching recipes:", error);
+        }
+      } else {
+        setSelectedRecipes([]);
+      }
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery]);
+
+  const handleFilterPress = async (filter) => {
+    try {
+      const recipes = await findRecipesByFilter(filter);
+      setSelectedRecipes(recipes);
+    } catch (error) {
+      console.error("Error fetching filtered recipes:", error);
     }
   };
 
@@ -74,6 +111,18 @@ const RezepteScreen = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.headerText}>Recipes</Text>
       </View>
+
+      <View style={styles.searchInput}>
+        <Ionicons name="search-sharp" size={25} color="#6f6d62" />
+        <TextInput
+          placeholder="Search for recipes"
+          placeholderTextColor="#6f6d62"
+          style={{ marginLeft: 15, fontSize: 18, color: "white" }}
+          value={searchQuery}
+          onChangeText={(query) => setSearchQuery(query)}
+        />
+      </View>
+
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -105,6 +154,7 @@ const RezepteScreen = ({ navigation }) => {
                 source={{ uri: recipe.image }}
                 style={styles.recipeImage}
               />
+
               <Text style={styles.recipeName}>{recipe.title}</Text>
               <TouchableOpacity
                 style={styles.favoriteIcon}
@@ -120,11 +170,22 @@ const RezepteScreen = ({ navigation }) => {
           ))}
         </View>
       </ScrollView>
+      <TouchableOpacity
+        style={styles.filter}
+        onPress={() => setShowFilter(true)}
+      >
+        <Ionicons name="filter-circle-sharp" size={45} color="#e8def7" />
+      </TouchableOpacity>
+
+      {showFilter && (
+        <FilterComponent
+          setShowFilter={setShowFilter}
+          handleFilterPress={handleFilterPress}
+        />
+      )}
     </View>
   );
 };
-
-export default RezepteScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -209,11 +270,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
   },
+  recipeTextContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   recipeName: {
     fontSize: 16,
     color: "#fff",
     paddingStart: 10,
     flexWrap: "wrap",
+    flex: 1,
   },
   recipeImage: {
     width: "100%",
@@ -242,4 +309,15 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
+  filter: {
+    position: "absolute",
+    bottom: 20,
+    left: 350,
+    borderRadius: 50,
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
+
+export default RezepteScreen;

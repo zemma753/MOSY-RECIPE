@@ -10,7 +10,10 @@ import {
   FlatList,
   ImageBackground,
 } from "react-native";
-import { widthPercentageToDP, heightPercentageToDP } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP,
+  heightPercentageToDP,
+} from "react-native-responsive-screen";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { findRecipesByName, getRandomRecipes } from "../data/API";
 
@@ -95,32 +98,24 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate("RecipeDetail", { recipe });
   };
 
-  const navigateToRezepteScreen = () => {
-    navigation.navigate("Rezepte");
+  const navigateToShoppingScreen = () => {
+    navigation.navigate("ShoppingList");
   };
 
   const navigateToVorratScreen = () => {
-    navigation.navigate("Vorrat");
+    navigation.navigate("Stock");
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Saving leftovers</Text>
-        <TouchableOpacity onPress={navigateToRezepteScreen}>
+        <TouchableOpacity
+          onPress={navigateToShoppingScreen}
+          style={{ marginTop: 15 }}
+        >
           <Ionicons name="cart" size={30} color="#988e73" />
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.searchInput}>
-        <Ionicons name="search-sharp" size={25} color="#6f6d62" />
-        <TextInput
-          placeholder="Search for recipes"
-          placeholderTextColor="#6f6d62"
-          style={{ marginLeft: 15, fontSize: 18, color: "white" }}
-          value={searchQuery}
-          onChangeText={(query) => setSearchQuery(query)}
-        />
       </View>
 
       {searchResults.length > 0 && (
@@ -152,40 +147,8 @@ const HomeScreen = ({ navigation }) => {
               source={{ uri: randomRecipes[currentIndex]?.image }}
               style={styles.itemImage}
               imageStyle={{ borderRadius: 30 }}
-            >
-              <TouchableOpacity
-                onPress={toggleFavorite}
-                style={styles.favoriteButton}
-              >
-                <AntDesign
-                  name={isFavorite ? "star" : "staro"}
-                  size={30}
-                  color={isFavorite ? "#E5C100" : "rgba(255, 255, 255, 0.5)"}
-                />
-              </TouchableOpacity>
-              <View style={styles.recipeTitleContainer}>
-                <Text style={styles.recipeNameOverlay}>{randomRecipes[currentIndex]?.title}</Text>
-              </View>
-            </ImageBackground>
+            ></ImageBackground>
           </TouchableOpacity>
-          <View style={styles.navigationButtons}>
-            {currentIndex > 0 && (
-              <TouchableOpacity
-                style={styles.arrowButton}
-                onPress={handlePrevRecipe}
-              >
-                <Ionicons name="chevron-back" size={30} color="rgba(255, 255, 255, 0.5)" />
-              </TouchableOpacity>
-            )}
-            {currentIndex < randomRecipes.length - 1 && (
-              <TouchableOpacity
-                style={styles.arrowButton}
-                onPress={handleNextRecipe}
-              >
-                <Ionicons name="chevron-forward" size={30} color="rgba(255, 255, 255, 0.5)" />
-              </TouchableOpacity>
-            )}
-          </View>
         </View>
       </View>
 
@@ -198,7 +161,8 @@ const HomeScreen = ({ navigation }) => {
           style={styles.icon}
         />
         <Text style={styles.transparentBoxText}>
-          Save leftovers: Still have ingredients from last week? Nothing goes to waste here.
+          Save leftovers: Still have ingredients from last week? Nothing goes to
+          waste here.
         </Text>
       </TouchableOpacity>
 
@@ -233,7 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: heightPercentageToDP(10),
+    height: heightPercentageToDP(12.5),
     paddingTop: 15,
     paddingHorizontal: 10,
   },
@@ -242,6 +206,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     marginLeft: 15,
+    marginTop: 15,
   },
   searchInput: {
     flexDirection: "row",
@@ -267,16 +232,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   itemImage: {
-    width: 250,
-    height: 170,
+    width: widthPercentageToDP(90),
+    height: heightPercentageToDP(30),
     resizeMode: "cover",
     justifyContent: "flex-end",
     alignItems: "center",
-    borderRadius: 30,
+    //borderRadius: 5,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 5,
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -299,21 +264,25 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 10,
     textAlign: "center",
+    paddingBottom: 10,
   },
   tipsScrollContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 10,
   },
   tipsScrollView: {
     paddingHorizontal: 10,
+    marginBottom: 10,
   },
   tipCard: {
-    backgroundColor: "# 353430",
+    backgroundColor: "#353430",
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
     marginHorizontal: 10,
-    maxWidth: 300,
+    width: 250, // Added fixed width
+    height: 200, // Added fixed height
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -404,4 +373,3 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-
