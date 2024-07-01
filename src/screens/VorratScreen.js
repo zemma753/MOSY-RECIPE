@@ -16,14 +16,16 @@ import {
 } from "react-native-responsive-screen";
 import { findRecipesByIngredient, getRecipeDetailsById } from "../data/API";
 import debounce from "lodash.debounce";
-import { useFavorites } from "../components/FavoritesContext";
+import {
+  useFavorites,
+  useRecentlyViewed,
+} from "../components/FavoritesContext";
 
 const VorratScreen = ({ navigation }) => {
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const { favorites, setFavorites } = useFavorites();
-
-  const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
+  const { addToRecentlyViewed } = useRecentlyViewed();
 
   const handleSearch = useCallback(
     debounce(async (input) => {
@@ -40,7 +42,7 @@ const VorratScreen = ({ navigation }) => {
       } else {
         setSelectedRecipes([]);
       }
-    }, 500),
+    }, 1000),
     []
   );
 
@@ -51,6 +53,7 @@ const VorratScreen = ({ navigation }) => {
   const handleRecipePress = async (id) => {
     try {
       const recipe = await getRecipeDetailsById(id);
+      addToRecentlyViewed(recipe);
       navigation.navigate("RecipeDetail", { recipe });
     } catch (error) {
       console.error("Error fetching recipe details:", error);
@@ -58,7 +61,7 @@ const VorratScreen = ({ navigation }) => {
   };
 
   const handleFavoritePress = (recipe) => {
-    if (isFavorite(recipe)) {
+    if (favorites.some((fav) => fav.id === recipe.id)) {
       setFavorites(favorites.filter((fav) => fav.id !== recipe.id));
     } else {
       setFavorites([...favorites, recipe]);

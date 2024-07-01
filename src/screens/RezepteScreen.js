@@ -13,14 +13,21 @@ import {
   heightPercentageToDP,
 } from "react-native-responsive-screen";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { AntDesign } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Feather,
+  FontAwesome,
+  FontAwesome6,
+} from "@expo/vector-icons";
 import {
   findRecipesByCategory,
   getRecipeDetailsById,
   findRecipesByName,
-  findRecipesByFilter,
 } from "../data/API";
-import { useFavorites } from "../components/FavoritesContext";
+import {
+  useFavorites,
+  useRecentlyViewed,
+} from "../components/FavoritesContext";
 import debounce from "lodash.debounce";
 import FilterComponent from "../components/Filter";
 
@@ -28,6 +35,7 @@ const RezepteScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedRecipes, setSelectedRecipes] = useState([]);
   const { favorites, setFavorites } = useFavorites();
+  const { addToRecentlyViewed } = useRecentlyViewed();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilter, setShowFilter] = useState(false);
 
@@ -46,6 +54,7 @@ const RezepteScreen = ({ navigation }) => {
   const handleRecipePress = async (id) => {
     try {
       const recipe = await getRecipeDetailsById(id);
+      addToRecentlyViewed(recipe);
       navigation.navigate("RecipeDetail", { recipe });
     } catch (error) {
       console.error("Error fetching recipe details:", error);
@@ -79,15 +88,6 @@ const RezepteScreen = ({ navigation }) => {
   useEffect(() => {
     handleSearch(searchQuery);
   }, [searchQuery]);
-
-  const handleFilterPress = async (filter) => {
-    try {
-      const recipes = await findRecipesByFilter(filter);
-      setSelectedRecipes(recipes);
-    } catch (error) {
-      console.error("Error fetching filtered recipes:", error);
-    }
-  };
 
   const categories = [
     {
@@ -180,7 +180,7 @@ const RezepteScreen = ({ navigation }) => {
       {showFilter && (
         <FilterComponent
           setShowFilter={setShowFilter}
-          handleFilterPress={handleFilterPress}
+          setSelectedRecipes={setSelectedRecipes}
         />
       )}
     </View>

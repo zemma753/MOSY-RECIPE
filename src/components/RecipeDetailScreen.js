@@ -42,6 +42,14 @@ const RecipeDetailScreen = ({ navigation, route }) => {
     fetchRecipeDetails();
   }, [recipe]);
 
+  if (!recipeDetails) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
   const unitAbbreviations = {
     kilogram: "kg",
     gram: "g",
@@ -298,4 +306,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   favoriteIcon: {},
+  loadingText: {
+    color: "#fff",
+  },
 });
