@@ -104,7 +104,7 @@ const HomeScreen = ({ navigation }) => {
       )}
 
       <View style={styles.middleContainer}>
-        <Text style={styles.tipsHeader}>Recipes of the day:</Text>
+        <Text style={styles.tipsHeader}>Recipe of the day:</Text>
         <View style={styles.recipeContainer}>
           <TouchableOpacity
             style={styles.recipeImageWrapper}
@@ -132,7 +132,7 @@ const HomeScreen = ({ navigation }) => {
           />
           <Text style={styles.leftOverHeader}>Save leftovers</Text>
           <Text style={styles.leftOverText}>
-            Still have ingredients from last week?{"\n"}Nothing goes to waste
+            Still have ingredients from last{"\n"}week? Nothing goes to waste{"\n"}
             here.
           </Text>
         </TouchableOpacity>
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   leftOverText: {
     color: "#fff",
     fontSize: 16,
-    right: 110,
+    right: 140,
     top: 10,
   },
   tipsHeader: {
