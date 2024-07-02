@@ -132,7 +132,8 @@ const HomeScreen = ({ navigation }) => {
           />
           <Text style={styles.leftOverHeader}>Save leftovers</Text>
           <Text style={styles.leftOverText}>
-            Still have ingredients from last{"\n"}week? Nothing goes to waste{"\n"}
+            Still have ingredients from last{"\n"}week? Nothing goes to waste
+            {"\n"}
             here.
           </Text>
         </TouchableOpacity>
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
   leftOverText: {
     color: "#fff",
     fontSize: 16,
-    right: 140,
+    right: 110,
     top: 10,
   },
   tipsHeader: {

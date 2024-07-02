@@ -8,7 +8,14 @@ const api = axios.create({
   },
 });
 
+const cache = {};
+
 export const findRecipesByIngredient = async (ingredients) => {
+  const cacheKey = ingredients.sort().join(",");
+  if (cache[cacheKey]) {
+    return cache[cacheKey];
+  }
+
   try {
     const response = await api.get(`/findByIngredients`, {
       params: {
@@ -17,6 +24,7 @@ export const findRecipesByIngredient = async (ingredients) => {
         apiKey: SPOONACULAR_API_KEY,
       },
     });
+
     const recipeDetailsPromises = response.data.map(async (recipe) => {
       const detailsResponse = await getRecipeDetailsById(recipe.id);
       return {
@@ -27,7 +35,9 @@ export const findRecipesByIngredient = async (ingredients) => {
       };
     });
 
-    return await Promise.all(recipeDetailsPromises);
+    const results = await Promise.all(recipeDetailsPromises);
+    cache[cacheKey] = results;
+    return results;
   } catch (error) {
     console.error("Error fetching recipes:", error);
     throw error;

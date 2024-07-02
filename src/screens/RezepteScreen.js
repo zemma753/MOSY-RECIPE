@@ -23,6 +23,7 @@ import {
   findRecipesByCategory,
   getRecipeDetailsById,
   findRecipesByName,
+  findRecipesByFilter,
 } from "../data/API";
 import {
   useFavorites,
@@ -91,20 +92,29 @@ const RezepteScreen = ({ navigation }) => {
 
   const categories = [
     {
-      name: "main course",
-      image: require("../../assets/ingredients/eier.png"),
+      name: "main meal",
+      image: require("../../assets/main_meal.png"),
     },
-    { name: "dessert", image: require("../../assets/ingredients/paprika.png") },
-    { name: "salad", image: require("../../assets/ingredients/zwiebel.png") },
-    { name: "snack", image: require("../../assets/ingredients/sellerie.png") },
+    { name: "dessert", image: require("../../assets/dessert.png") },
+    { name: "salad", image: require("../../assets/salad.png") },
+    { name: "snack", image: require("../../assets/snack.png") },
     {
       name: "breakfast",
-      image: require("../../assets/ingredients/carrots.png"),
+      image: require("../../assets/breakfast.png"),
     },
   ];
 
   const navigateBack = () => {
     navigation.navigate("ShoppingList");
+  };
+
+  const handleFilterPress = async (filter) => {
+    try {
+      const recipes = await findRecipesByFilter(filter);
+      setSelectedRecipes(recipes);
+    } catch (error) {
+      console.error("Error fetching filtered recipes:", error);
+    }
   };
 
   return (
@@ -187,7 +197,7 @@ const RezepteScreen = ({ navigation }) => {
       {showFilter && (
         <FilterComponent
           setShowFilter={setShowFilter}
-          setSelectedRecipes={setSelectedRecipes}
+          handleFilterPress={handleFilterPress}
         />
       )}
     </View>

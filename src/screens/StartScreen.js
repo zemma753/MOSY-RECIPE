@@ -23,7 +23,7 @@ export default function StartScreen() {
         />
       </View>
       <View>
-        <Text style={styles.title}>Recipe Saver</Text>
+        <Text style={styles.title}>Food Saver</Text>
         <Text style={styles.subtitle}>
           Save and manage your favorite recipes with ease
         </Text>
