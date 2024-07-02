@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
     width: widthPercentageToDP(60),
     height: heightPercentageToDP(35),
     marginStart: 20,
+    marginEnd: 15,
     backgroundColor: "#252421",
     borderRadius: 10,
   },

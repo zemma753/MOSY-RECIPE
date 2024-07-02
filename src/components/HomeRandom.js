@@ -29,8 +29,10 @@ const HomeRandom = ({ recipes, onRecipePress }) => {
   const isFavorite = (recipe) => favorites.some((fav) => fav.id === recipe.id);
 
   const handleFavoritePress = (recipe) => {
-    if (!favorites.some((fav) => fav.id === recipe.id)) {
-      setFavorites([...favorites, recipe]);
+    if (favorites.some((fav) => fav.id === recipe.id)) {
+      setFavorites(favorites.filter((fav) => fav.id !== recipe.id));
+    } else{
+      setFavorites([...favorites, recipe])
     }
   };
 
@@ -78,6 +80,7 @@ const styles = StyleSheet.create({
     marginStart: 20,
     backgroundColor: "#252421",
     borderRadius: 10,
+    marginEnd: 15
   },
   recipeImage: {
     width: "100%",

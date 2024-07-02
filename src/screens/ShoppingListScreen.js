@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,17 +7,47 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import {
   widthPercentageToDP,
   heightPercentageToDP,
 } from "react-native-responsive-screen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ShoppingListScreen = ({ navigation }) => {
   const [items, setItems] = useState([]);
   const [itemName, setItemName] = useState("");
   const [itemQuantity, setItemQuantity] = useState("");
+
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const storedItems = await AsyncStorage.getItem("shoppingListItems");
+        if (storedItems) {
+          setItems(JSON.parse(storedItems));
+        }
+      } catch (error) {
+        console.error("Error loading items from AsyncStorage:", error);
+      }
+    };
+
+    loadItems();
+  }, []);
+
+  useEffect(() => {
+    const saveItems = async () => {
+      try {
+        await AsyncStorage.setItem("shoppingListItems", JSON.stringify(items));
+      } catch (error) {
+        console.error("Error saving items to AsyncStorage:", error);
+      }
+    };
+
+    saveItems();
+  }, [items]);
 
   const getIngredientImageUrl = (ingredient, plural = false) => {
     const formattedIngredient = (plural ? ingredient + "s" : ingredient)
@@ -57,14 +87,17 @@ const ShoppingListScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerText}>ShoppingList</Text>
         <TouchableOpacity
-          style={{ alignItems: "flex-end", margin: 10 }}
+          style={{ alignItems: "flex-end",marginRight: 20, marginTop: 15}}
           onPress={handleClearAllItems}
         >
           <Feather name="trash-2" size={29} color="white" />
@@ -124,7 +157,7 @@ const ShoppingListScreen = ({ navigation }) => {
           <Ionicons name="checkmark" size={24} color="white" />
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
